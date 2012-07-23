@@ -29,7 +29,11 @@ module DTK
           end
         end
         clone_cmd_opts = {:raise => true, :timeout => 60}
-        ::Grit::Git.new("").clone(clone_cmd_opts,git_server_url,target_repo_dir)
+        clone_args = [clone_cmd_opts,git_server_url,target_repo_dir]
+        if branch = opts[:branch] 
+          clone_args += ["-b",branch]
+        end
+        ::Grit::Git.new("").clone(*clone_args)
       end
 
       def branches()
