@@ -1,9 +1,10 @@
 require 'grit'
+require 'fileutils'
 module DTK
   module Common
     class GritAdapter 
-      r8_nested_require('grit_adapter','file_access')
-      r8_nested_require('grit_adapter','object_access')
+      require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
+      require File.expand_path('grit_adapter/object_access', File.dirname(__FILE__))
       def initialize(repo_dir,branch='master')
         @repo_dir = repo_dir
         @branch = branch
@@ -17,6 +18,18 @@ module DTK
         rescue => e
           raise e
         end
+      end
+
+      def self.clone(target_repo_dir,git_server_url,opts={})
+        if File.directory?(target_repo_dir)
+          if opts[:delete_if_exists]
+            FileUtils.rm_rf local_repo_dir
+          else
+            raise Error.new("trying to create a repo directory (#{target_repo_dir}) that exists already")
+          end
+        end
+        clone_cmd_opts = {:raise => true, :timeout => 60}
+        ::Grit::Git.new("").clone(clone_cmd_opts,git_server_url,target_repo_dir)
       end
 
       def branches()

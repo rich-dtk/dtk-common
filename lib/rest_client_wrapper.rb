@@ -77,6 +77,11 @@ module DTK
         def data()
           self[DataField]
         end
+        
+        def data_ret_and_remove!(*data_keys)
+          data = data()
+          data_keys.map{|key|data.delete(key.to_s)}
+        end
       end
 
       module ResponseErrorMixin
