@@ -11,6 +11,13 @@ module DTK::Common; class GritAdapter
       end
     end
 
+    def add_file_command(file_rel_path)
+      chdir_and_checkout do
+        file_path = qualified_path(file_rel_path)
+        git_command(:add,file_path)
+      end
+    end
+
     def remove_file(file_rel_path)
       file_path = qualified_path(file_rel_path)
       chdir_and_checkout do
