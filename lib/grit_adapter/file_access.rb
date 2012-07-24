@@ -1,5 +1,7 @@
 module DTK::Common; class GritAdapter
   class FileAccess < self
+    require File.expand_path('file_access/status', File.dirname(__FILE__))
+    include StatusMixin
     def add_file(file_rel_path,content)
       content ||= String.new
       file_path = qualified_path(file_rel_path)
@@ -34,10 +36,11 @@ module DTK::Common; class GritAdapter
          current_head = @grit_repo.head.name
          git_command(:checkout,branch) unless current_head == branch
          return unless block
-         yield
+         ret = yield
          unless current_head == branch
            git_command(:checkout,current_head)
          end
+         ret
        end
      end
    end
