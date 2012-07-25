@@ -1,4 +1,4 @@
-module DTK::Common; class GritAdapter; class FileAccess
+module DTK; module Common; class GritAdapter; class FileAccess
   module DiffMixin
     def diff(other_branch)
       grit_diffs = @grit_repo.diff(@branch,other_branch)
@@ -72,4 +72,4 @@ module DTK::Common; class GritAdapter; class FileAccess
       attr_writer(*Attributes) 
     end
   end
-end; end; end
+end; end; end; end
