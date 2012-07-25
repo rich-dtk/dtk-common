@@ -24,17 +24,26 @@ module DTK
       def self.clone(target_repo_dir,git_server_url,opts={})
         if File.directory?(target_repo_dir)
           if opts[:delete_if_exists]
-            FileUtils.rm_rf local_repo_dir
+            FileUtils.rm_rf target_repo_dir
           else
             raise Error.new("trying to create a repo directory (#{target_repo_dir}) that exists already")
           end
         end
         clone_cmd_opts = {:raise => true, :timeout => 60}
-        clone_args = [clone_cmd_opts,git_server_url,target_repo_dir]
+        clone_args = [git_server_url,target_repo_dir]
         if branch = opts[:branch] 
           clone_args += ["-b",branch]
         end
-        ::Grit::Git.new("").clone(*clone_args)
+        ::Grit::Git.new("").clone(clone_cmd_opts,*clone_args)
+        ret = new(*[target_repo_dir,opts[:branch]].compact)
+        #make sure remote branch exists; ::Grit::Git.new("").clone silently uses master if remote branch does not exist
+        if branch = opts[:branch]
+          unless ret.branches().include?(opts[:branch])
+            FileUtils.rm_rf target_repo_dir
+            raise Error.new("Remote branch (#{opts[:branch]}) does not exist")
+          end
+        end
+        ret
       end
 
       def branches()
