@@ -12,7 +12,8 @@ module DTK; module Common; class GritAdapter; class FileAccess
     end
 
     class Diffs < Array
-      class Summary < ::DTK::SimpleHashObject
+      DTK::Common.r8_require_common('hash_object')
+      class Summary < SimpleHashObject
         def no_diffs?()
           keys().empty?
         end

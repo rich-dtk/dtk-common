@@ -2,6 +2,7 @@ require 'grit'
 require 'fileutils'
 module DTK
   module Common
+    require File.expand_path('require_first',File.dirname(__FILE__))
     class GritAdapter 
       require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
       require File.expand_path('grit_adapter/object_access', File.dirname(__FILE__))
