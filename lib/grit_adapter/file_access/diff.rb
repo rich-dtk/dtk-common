@@ -1,13 +1,13 @@
 class DTK::Common::GritAdapter::FileAccess
   module DiffMixin
     def diff(*args)
-      refs = 
+      diff_comamnd_args = 
         case args.size
          when 1 then [@branch,args[0]]
          when 2 then args
           else raise Error.new("diff must have 1 or 2 arguments")
         end
-      grit_diffs = @grit_repo.diff(*refs)
+      grit_diffs = @grit_repo.diff(*diff_comamnd_args)
       array_diff_hashes = grit_diffs.map do |diff|
         Diff::Attributes.inject(Hash.new) do |h,a|
           val = diff.send(a)
