@@ -1,7 +1,13 @@
 class DTK::Common::GritAdapter::FileAccess
   module DiffMixin
-    def diff(other_branch)
-      grit_diffs = @grit_repo.diff(@branch,other_branch)
+    def diff(*args)
+      refs = 
+        case args.size
+         when 1 then [@branch,args[0]]
+         when 2 then args
+          else raise Error.new("diff must have 1 or 2 arguments")
+        end
+      grit_diffs = @grit_repo.diff(*refs)
       array_diff_hashes = grit_diffs.map do |diff|
         Diff::Attributes.inject(Hash.new) do |h,a|
           val = diff.send(a)
@@ -14,11 +20,11 @@ class DTK::Common::GritAdapter::FileAccess
     class Diffs < Array
       ::DTK::Common.r8_require_common('hash_object')
       class Summary < ::DTK::Common::SimpleHashObject
-        def no_diffs?()
-          keys().empty?
+        def any_diffs?()
+          !keys().empty?
         end
-        def no_added_or_deleted_files?()
-          not (self[:files_renamed] or self[:files_added] or self[:files_deleted])
+        def any_added_or_deleted_files?()
+          !!(self[:files_renamed] or self[:files_added] or self[:files_deleted])
         end
         
         def meta_file_changed?()

@@ -26,11 +26,16 @@ module DTK::Common; class GritAdapter
         git_command(:rm,file_path)
       end
     end
-    
-    def commit(commit_msg)
-      #TODO is chdir_and_checkout needed
+
+    def fetch_branch(remote="origin")
       chdir_and_checkout do
-        @grit_repo.commit_index(commit_msg)
+        git_command(:fetch,remote,@branch)
+      end
+    end
+
+    def commit(commit_msg)
+      chdir_and_checkout do
+        git_command(:commit,"-m",commit_msg)
       end
     end
 

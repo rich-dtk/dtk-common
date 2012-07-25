@@ -19,13 +19,6 @@ module DTK::Common; class GritAdapter; class FileAccess
         !!FileStates.find{|fs|self[fs]}
       end
       
-      def shift_untracked_to_added!()
-        if untracked = self.delete(:untracked)
-          self[:added] = (self[:added]||[]) + untracked
-        end
-        self
-      end
-
       FileStates = [:added,:deleted,:changed,:untracked]
     end
   end                                         
