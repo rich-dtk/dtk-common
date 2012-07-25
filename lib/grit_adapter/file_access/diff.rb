@@ -1,4 +1,4 @@
-module DTK; module Common; class GritAdapter; class FileAccess
+class DTK::Common::GritAdapter::FileAccess
   module DiffMixin
     def diff(other_branch)
       grit_diffs = @grit_repo.diff(@branch,other_branch)
@@ -12,8 +12,8 @@ module DTK; module Common; class GritAdapter; class FileAccess
     end
 
     class Diffs < Array
-      DTK::Common.r8_require_common('hash_object')
-      class Summary < SimpleHashObject
+      ::DTK::Common.r8_require_common('hash_object')
+      class Summary < ::DTK::Common::SimpleHashObject
         def no_diffs?()
           keys().empty?
         end
@@ -73,4 +73,4 @@ module DTK; module Common; class GritAdapter; class FileAccess
       attr_writer(*Attributes) 
     end
   end
-end; end; end; end
+end
