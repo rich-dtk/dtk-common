@@ -35,7 +35,8 @@ module DTK::Common; class GritAdapter
 
     def commit(commit_msg)
       chdir_and_checkout do
-        @grit_repo.commit_all(commit_msg)
+        #note using following because silent failure @grit_repo.commit_all(commit_msg)
+        git_command(:commit,"-a","-m",commit_msg)
       end
     end
 
