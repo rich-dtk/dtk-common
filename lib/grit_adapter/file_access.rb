@@ -52,6 +52,7 @@ module DTK::Common; class GritAdapter
        "#{@repo_dir}/#{file_rel_path}"
      end
 
+     #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
      def chdir_and_checkout(branch=nil,&block)
        branch ||= @branch
        Dir.chdir(@repo_dir) do 
