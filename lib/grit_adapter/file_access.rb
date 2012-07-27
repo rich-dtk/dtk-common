@@ -33,12 +33,19 @@ module DTK::Common; class GritAdapter
       end
     end
 
-    def commit(commit_msg)
+    def commit(commit_msg,opts={})
+      cmd_args = [:commit,"-a","-m",commit_msg]
+      author = "#{opts[:author_username]||DefaultAuthor[:username]} <#{opts[:author_email]||DefaultAuthor[:email]}>"
+      cmd_args += ["--author",author]
       chdir_and_checkout do
         #note using following because silent failure @grit_repo.commit_all(commit_msg)
-        git_command(:commit,"-a","-m",commit_msg)
+        git_command(*cmd_args)
       end
     end
+    DefaultAuthor = {
+      :username => "dtk",
+      :email => "dtk@reactor8.com"
+    }
 
    private
      def qualified_path(file_rel_path)
