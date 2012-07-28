@@ -9,7 +9,7 @@ module DTK; module Common
     include DBandModelMixin
 
     def initialize(db_params)
-      @db = db_adapter_class().new(db_params)
+      @db = db_adapter_class().create(db_params)
     end
    private
     def method_missing(name,*args,&block)
