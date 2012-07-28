@@ -1,12 +1,19 @@
 module DTK; module Common
   module DBandModelMixin
+   private
     def db_adapter_class()
       DB::Adapter::Postgres
+    end
+  end
+  module DBandModelClassMixin
+    def migration_class()
+      ::Sequel
     end
   end
 
   class DB
     include DBandModelMixin
+    extend DBandModelClassMixin
 
     def initialize(db_params)
       @db = db_adapter_class().create(db_params)
@@ -26,6 +33,10 @@ module DTK; module Common
 
   class Model
     include DBandModelMixin
+    extend DBandModelClassMixin
+    def self.migration(&block)
+      migration_class().migration(&block)
+    end
   end
 end; end
 
