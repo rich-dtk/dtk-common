@@ -9,6 +9,10 @@ module DTK; module Common
     def migration_class()
       ::Sequel
     end
+
+    def model_top()
+      ::Sequel::Model
+    end
   end
 
   class DB
@@ -36,6 +40,10 @@ module DTK; module Common
     extend DBandModelClassMixin
     def self.migration(&block)
       migration_class().migration(&block)
+    end
+
+    def self.Top
+      model_top()
     end
   end
 end; end
