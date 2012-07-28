@@ -1,3 +1,4 @@
+#TODO: should have a Common namespace put in after DTK
 #When creating these objects, an internal errro class is passed to the creation functions
 module DTK
   class RestError  

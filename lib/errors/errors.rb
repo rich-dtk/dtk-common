@@ -1,3 +1,4 @@
+#TODO: should have a Common namespace put in after DTK
 module DTK
   class Error < NameError
     def self.top_error_in_hash()
