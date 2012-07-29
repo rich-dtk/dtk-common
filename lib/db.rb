@@ -1,23 +1,22 @@
 module DTK; module Common
-  module DBandModelMixin
+  module ORMMixin
    private
     def db_adapter_class()
       DB::Adapter::Postgres
     end
   end
-  module DBandModelClassMixin
+  module ORMClassMixin
     def migration_class()
       ::Sequel
     end
-
-    def model_top()
-      ::Sequel::Model
+    def ORMModel() 
+      ::Sequel::Model 
     end
   end
 
   class DB
-    include DBandModelMixin
-    extend DBandModelClassMixin
+    include ORMMixin
+    extend ORMClassMixin
 
     def initialize(db_params)
       @db = db_adapter_class().create(db_params)
@@ -36,14 +35,47 @@ module DTK; module Common
   end
 
   class Model
-    include DBandModelMixin
-    extend DBandModelClassMixin
-    def self.migration(&block)
-      migration_class().migration(&block)
-    end
+    include ORMMixin
+    extend ORMClassMixin
+    class << self
+      def inherited(subclass)
+        super
+        subclass.class_eval("class #{class_name(subclass)} < ORMModel();end")
+      end
 
-    def self.Top
-      model_top()
+      def migration(&block)
+        migration_class().migration(&block)
+      end
+
+      def respond_to?(name)
+        (!!respond_to_mapped_name(name))||super
+      end
+     private
+      #complexity with orm_handle arises beacuse sequel does not seem to allow abstract class to inherit to ::Sequel::Model
+      def method_missing(name,*args,&block)
+        mapped_name = respond_to_mapped_name(name)
+        mapped_name ? orm_handle().send(mapped_name,*args,&block) : super
+      end
+
+      def respond_to_mapped_name(name)
+        name_s = name.to_s
+        if name_s == "[]"
+          "[]".to_sym
+        elsif name_s =~ /^_(.+$)/
+          mapped_name = $1.to_sym
+          orm_handle().respond_to?(mapped_name) && mapped_name
+        else
+          nil
+        end
+      end
+
+      def orm_handle()
+        #TODO: check if safe to use return @orm_handle if @orm_handle
+        const_get class_name()
+      end
+      def class_name(klass=nil)
+        (klass||self).to_s =~ /::([^:]+$)/;$1
+      end
     end
   end
 end; end
