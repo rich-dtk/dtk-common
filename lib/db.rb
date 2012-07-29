@@ -50,7 +50,21 @@ module DTK; module Common
       def respond_to?(name)
         (!!respond_to_mapped_name(name))||super
       end
+
      private
+      ### methods that are helpers to process data
+      def _all(opts={})
+        orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
+      end
+      def convert_raw_record(sequel_record,opts={})
+        ret = sequel_record.values
+        if opts[:no_nulls]
+          ret.each_key{|k|ret.delete(k) if ret[k].nil?}
+        end
+        ret
+      end
+      #### end methods that
+
       #complexity with orm_handle arises beacuse sequel does not seem to allow abstract class to inherit to ::Sequel::Model
       def method_missing(name,*args,&block)
         mapped_name = respond_to_mapped_name(name)
