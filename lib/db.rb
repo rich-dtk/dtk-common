@@ -1,3 +1,4 @@
+#TODO: facter into multiple files
 module DTK; module Common
   module ORMMixin
    private
@@ -52,7 +53,25 @@ module DTK; module Common
       end
 
      private
-      ### methods that are helpers to process data
+      ### overrides to straight passing to orm
+      def _create(hash_values)
+        hash_values_x = hash_values
+        (@json_fields||[]).each do |jf|
+          val = key = nil
+          if hash_values_x[jf]
+            val = hash_values_x[jf]
+            key = jf
+          elsif hash_values_x[jf.to_sym]
+            val = hash_values_x[jf.to_sym]
+            key = jf.to_sym
+          end
+          if key and 
+              hash_values_x[key] = convert_hash_to_json?(val)
+          end
+        end
+        orm_handle().create(hash_values_x)
+      end
+
       def _all(opts={})
         orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
       end
@@ -61,9 +80,37 @@ module DTK; module Common
         if opts[:no_nulls]
           ret.each_key{|k|ret.delete(k) if ret[k].nil?}
         end
+        #TODO: simple processing that does not do mergeing
+        (@json_fields||[]).each do |json_field|
+          ret[json_field] = convert_json_to_hash?(ret[json_field])
+        end
         ret
       end
-      #### end methods that
+      #### END: overrides to straight passing to orm
+
+      ##methods to deal with JSON fields
+      require 'json'
+
+      def JSONField(field_name)
+        (@json_fields ||= Array.new) << field_name
+      end
+      #converts from json form if it is in json form
+      def convert_json_to_hash?(possible_json_val)
+        ret = possible_json_val
+        return ret unless possible_json_val.kind_of?(String)
+        begin
+          ret = JSON.parse(possible_json_val)
+        rescue
+        end
+        ret
+      end
+      def convert_hash_to_json?(possible_hash)
+        ret = possible_hash
+        return ret unless possible_hash.kind_of?(Hash)
+        JSON.generate(possible_hash)
+      end
+
+      ##END: methods to deal with JSON fields
 
       #complexity with orm_handle arises beacuse sequel does not seem to allow abstract class to inherit to ::Sequel::Model
       def method_missing(name,*args,&block)
