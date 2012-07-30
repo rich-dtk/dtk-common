@@ -52,6 +52,16 @@ module DTK; module Common
         (!!respond_to_mapped_name(name))||super
       end
 
+      def delete(hash_filter)
+        unless hash_filter.keys == [:id]
+          raise Error.new("Not implemented yet: delete filter otehr than providing id")
+        end
+        unless element = orm_handle()[hash_filter[:id]]
+          raise ErrorUsage.new("There is no object of type (#{class_name()}) with id (#{hash_filter[:id].to_s})")
+        end
+        element.delete()
+      end
+
      private
       ### overrides to straight passing to orm
       def _create(hash_values)
@@ -75,6 +85,7 @@ module DTK; module Common
       def _all(opts={})
         orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
       end
+
       def convert_raw_record(sequel_record,opts={})
         ret = sequel_record.values
         if opts[:no_nulls]
