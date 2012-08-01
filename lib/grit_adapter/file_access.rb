@@ -33,17 +33,26 @@ module DTK::Common; class GritAdapter
       end
     end
 
-    def commit(commit_msg)
+    def commit(commit_msg,opts={})
+      cmd_args = [:commit,"-a","-m",commit_msg]
+      author = "#{opts[:author_username]||DefaultAuthor[:username]} <#{opts[:author_email]||DefaultAuthor[:email]}>"
+      cmd_args += ["--author",author]
       chdir_and_checkout do
-        @grit_repo.commit_all(commit_msg)
+        #note using following because silent failure @grit_repo.commit_all(commit_msg)
+        git_command(*cmd_args)
       end
     end
+    DefaultAuthor = {
+      :username => "dtk",
+      :email => "dtk@reactor8.com"
+    }
 
    private
      def qualified_path(file_rel_path)
        "#{@repo_dir}/#{file_rel_path}"
      end
 
+     #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
      def chdir_and_checkout(branch=nil,&block)
        branch ||= @branch
        Dir.chdir(@repo_dir) do 
