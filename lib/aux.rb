@@ -19,6 +19,13 @@ module DTK
         @macaddress = collection.fact('macaddress').value
       end
 
+      def get_ec2_instance_id()
+        return @ec2_instance_id if @ec2_instance_id
+        require 'facter'
+        collection = ::Facter.collection
+        @ec2_instance_id = collection.fact('ec2_instance_id').value
+      end
+
       private
       def running_process_home_dir()
         File.expand_path("~#{ENV['USER']}") 
