@@ -1,6 +1,8 @@
 #TODO: should I move all methods that user grit.git to file_access?
 require 'grit'
 require 'fileutils'
+require 'thread'
+
 module DTK
   module Common
     require File.expand_path('require_first',File.dirname(__FILE__))
