@@ -1,4 +1,3 @@
-#TODO: move app aux to heer and then just rename to Aux
 module DTK
   module Common
     module AuxMixin
@@ -15,7 +14,7 @@ module DTK
 
       def dtk_instance_repo_username()
         #on ec2 changing mac addresses; so selectively pick instance id on ec2
-        unique_id = Common::Aux.get_ec2_instance_id() || Common::Aux.get_macaddress().gsub(/:/,'-')
+        unique_id = get_ec2_instance_id() || get_macaddress().gsub(/:/,'-')
         "dtk-#{unique_id}"
       end
 
@@ -27,13 +26,30 @@ module DTK
       end
 
       def get_ec2_instance_id()
-        return @ec2_instance_id if @ec2_instance_id
-        require 'facter'
-        collection = ::Facter.collection
-        @ec2_instance_id = collection.fact('ec2_instance_id').value
+        # @ec2_instance_id_cached used because it could have tried to get this info and result was null
+        return @ec2_instance_id if @ec2_instance_id_cached
+        @ec2_instance_id_cached = true
+        @ec2_instance_id = get_ec2_meta_data('instance-id')
       end
 
       private
+      def get_ec2_meta_data(var)
+       #Fragments taken from Puppetlabs facter ec2
+        require 'open-uri'
+        require 'timeout'
+        ret = nil
+        begin 
+          url = "http://169.254.169.254:80/"
+          Timeout::timeout(WaitSec) {open(url)}
+          ret = OpenURI.open_uri("http://169.254.169.254/2008-02-01/meta-data/#{var}").read
+         rescue Timeout::Error
+         rescue
+          #TODO: unexpected; write t log what error is
+        end
+        ret
+      end    
+      WaitSec = 2
+  
       def running_process_home_dir()
         File.expand_path("~#{ENV['USER']}") 
       end
