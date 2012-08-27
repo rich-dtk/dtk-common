@@ -12,6 +12,13 @@ module DTK
           raise e
          end
       end
+
+      def dtk_instance_repo_username()
+        #on ec2 changing mac addresses; so selectively pick instance id on ec2
+        unique_id = Common::Aux.get_ec2_instance_id() || Common::Aux.get_macaddress().gsub(/:/,'-')
+        "dtk-#{unique_id}"
+      end
+
       def get_macaddress()
         return @macaddress if @macaddress
         require 'facter'
