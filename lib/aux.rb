@@ -18,8 +18,18 @@ module DTK
         "dtk-#{unique_id}"
       end
 
+      def update_ssh_known_hosts(remote_host)
+        fingerprint = `ssh-keyscan -H -t rsa #{remote_host}`
+        ssh_known_hosts = "#{running_process_home_dir()}/.ssh/known_hosts"
+        if File.file?(ssh_known_hosts)
+          `ssh-keygen -f "#{ssh_known_hosts}" -R #{remote_host}`
+        end
+        File.open(ssh_known_hosts,"a"){|f| f << "#{fingerprint}\n"}
+      end
+
       def get_macaddress()
         return @macaddress if @macaddress
+        #TODO: may just use underlying routines for facter - macaddress
         require 'facter'
         collection = ::Facter.collection
         @macaddress = collection.fact('macaddress').value
