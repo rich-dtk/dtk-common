@@ -1,4 +1,5 @@
 #TODO: facter into multiple files
+require File.expand_path('aux', File.dirname(__FILE__))
 module DTK; module Common
   module ORMMixin
    private
@@ -40,6 +41,11 @@ module DTK; module Common
     extend ORMClassMixin
     def initialize(orm_instance)
       @orm_instance = orm_instance
+    end
+
+    def to_hash(keys_subset=nil)
+      full_hash = super()
+      keys_subset ? Aux.hash_subset(full_hash,keys_subset) : full_hash
     end
 
     def method_missing(name,*args,&block)
@@ -99,8 +105,34 @@ module DTK; module Common
         orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
       end
 
+      def _where(filter,opts={})
+        orm_handle().where(filter).map{|raw_record|convert_raw_record(raw_record,opts)}
+      end
+
       def _first(filter,opts={})
-        convert_raw_record(orm_handle().first,opts)
+        raw_row = orm_handle().first(filter)
+        raw_row && convert_raw_record(raw_row,opts)
+      end
+
+      def ret_if_exists_and_unique(filter,opts={})
+        ret = nil
+        rows = _where(filter,opts)
+        ret = rows.first if rows.size == 1
+        if opts[:raise_error]
+          if rows.size == 0
+            raise ErrorUsage.new("Filter (#{pp_filter(filter)}) does not match any object of type #{object_type()}")
+          else # size > 1
+            raise ErrorUsage.new("Filter (#{pp_filter(filter)}) for object type #{object_type()} is ambiguous")
+          end
+        end
+        ret
+      end
+
+      def pp_filter(filter)
+        filter.inspect
+      end
+      def object_type()
+        _table_name()
       end
 
       def convert_raw_record(sequel_record,opts={})

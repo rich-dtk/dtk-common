@@ -12,6 +12,12 @@ module DTK
          end
       end
 
+      def hash_subset(hash,keys_subset)
+        keys_subset.inject(Hash.new) do |h,k|
+          hash.hash_key?(k) ? h.merge(k => hash[k]) : h
+        end
+      end
+
       def dtk_instance_repo_username()
         #on ec2 changing mac addresses; so selectively pick instance id on ec2
         unique_id = get_ec2_instance_id() || get_macaddress().gsub(/:/,'-')
