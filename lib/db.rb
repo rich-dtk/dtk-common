@@ -75,8 +75,8 @@ module DTK; module Common
             val = hash_values_x[jf.to_sym]
             key = jf.to_sym
           end
-          if key and 
-              hash_values_x[key] = convert_hash_to_json?(val)
+          if key  
+            hash_values_x[key] = convert_hash_to_json?(val)
           end
         end
         orm_handle().create(hash_values_x)
