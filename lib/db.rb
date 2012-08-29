@@ -38,6 +38,18 @@ module DTK; module Common
   class Model
     include ORMMixin
     extend ORMClassMixin
+    def initialize(orm_instance)
+      @orm_instance = orm_instance
+    end
+
+    def method_missing(name,*args,&block)
+      @orm_instance.respond_to?(name) ? @orm_instance.send(name,*args,&block) : super
+    end
+    def respond_to?(name)
+      @orm_instance.respond_to?(name)||super
+    end
+    private :method_missing,:respond_to?
+
     class << self
       def inherited(subclass)
         super
@@ -64,6 +76,7 @@ module DTK; module Common
 
      private
       ### overrides to straight passing to orm
+
       def _create(hash_values)
         hash_values_x = hash_values
         (@json_fields||[]).each do |jf|
@@ -86,7 +99,12 @@ module DTK; module Common
         orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
       end
 
+      def _first(filter,opts={})
+        convert_raw_record(orm_handle().first,opts)
+      end
+
       def convert_raw_record(sequel_record,opts={})
+        return new(sequel_record)
         ret = sequel_record.values
         if opts[:no_nulls]
           ret.each_key{|k|ret.delete(k) if ret[k].nil?}
@@ -131,9 +149,7 @@ module DTK; module Common
 
       def respond_to_mapped_name(name)
         name_s = name.to_s
-        if name_s == "[]"
-          "[]".to_sym
-        elsif name_s =~ /^_(.+$)/
+        if name_s =~ /^_(.+$)/
           mapped_name = $1.to_sym
           orm_handle().respond_to?(mapped_name) && mapped_name
         else
