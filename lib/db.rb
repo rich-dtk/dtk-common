@@ -48,22 +48,27 @@ module DTK; module Common
       keys_subset ? Aux.hash_subset(full_hash,keys_subset) : full_hash
     end
 
+    def _update(hash_values)
+      @orm_instance.update(self.class.preprocess_hash_values(hash_values))
+      # @orm_instance will have values that have been converted if needed
+      @orm_instance.set_values(@orm_instance.values.merge(hash_values))
+      self
+    end
+
+   private
     def method_missing(name,*args,&block)
       pass_to_orm_instance(name) ? @orm_instance.send(name,*args,&block) : super
     end
     def respond_to?(name)
       pass_to_orm_instance(name)||super
     end
+
     def pass_to_orm_instance(name)
       SupportedOrmMethods.include?(name)
     end
-    private :method_missing,:respond_to?,:pass_to_orm_instance
     SupportedOrmMethods = [:values]
 
-    def hash_form()
-      @orm_instance.values()
-    end
-
+   public
     class << self
       def inherited(subclass)
         super
@@ -92,21 +97,7 @@ module DTK; module Common
       ### overrides to straight passing to orm
 
       def _create(hash_values)
-        hash_values_x = hash_values
-        (@json_fields||[]).each do |jf|
-          val = key = nil
-          if hash_values_x[jf]
-            val = hash_values_x[jf]
-            key = jf
-          elsif hash_values_x[jf.to_sym]
-            val = hash_values_x[jf.to_sym]
-            key = jf.to_sym
-          end
-          if key  
-            hash_values_x[key] = convert_hash_to_json?(val)
-          end
-        end
-        orm_handle().create(hash_values_x)
+        orm_handle().create(preprocess_hash_values(hash_values))
       end
 
       def _all(opts={})
@@ -122,18 +113,41 @@ module DTK; module Common
         raw_row && convert_raw_record(raw_row,opts)
       end
 
+      def preprocess_hash_values(hash_values)
+        return hash_values if (@json_fields||[]).empty?
+        ret = hash_values.dup
+        (@json_fields||[]).each do |jf|
+          val = key = nil
+          if ret[jf]
+            val = ret[jf]
+            key = jf
+          elsif ret[jf.to_sym]
+            val = ret[jf.to_sym]
+            key = jf.to_sym
+          end
+          if key  
+            ret[key] = convert_hash_to_json?(val)
+          end
+        end
+        ret
+      end
+      public :preprocess_hash_values
+
+      def extract_db_hash_assigns(hash)
+        Aux.hash_subset(hash,_columns())
+      end
+
       def ret_if_exists_and_unique(filter,opts={})
-        ret = nil
         rows = _where(filter,opts)
-        ret = rows.first if rows.size == 1
-        if opts[:raise_error]
+        if rows.size == 1
+          rows.first 
+        elsif opts[:raise_error]
           if rows.size == 0
             raise ErrorUsage.new("Filter (#{pp_filter(filter)}) does not match any object of type #{object_type()}")
           else # size > 1
             raise ErrorUsage.new("Filter (#{pp_filter(filter)}) for object type #{object_type()} is ambiguous")
           end
         end
-        ret
       end
 
       def pp_filter(filter)

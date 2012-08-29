@@ -14,7 +14,7 @@ module DTK
 
       def hash_subset(hash,keys_subset)
         keys_subset.inject(Hash.new) do |h,k|
-          hash.hash_key?(k) ? h.merge(k => hash[k]) : h
+          hash.has_key?(k) ? h.merge(k => hash[k]) : h
         end
       end
 
