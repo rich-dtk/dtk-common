@@ -43,18 +43,26 @@ module DTK; module Common
       @orm_instance = orm_instance
     end
 
-    def to_hash(keys_subset=nil)
-      full_hash = super()
+    def hash_form(keys_subset=nil)
+      full_hash = values
       keys_subset ? Aux.hash_subset(full_hash,keys_subset) : full_hash
     end
 
     def method_missing(name,*args,&block)
-      @orm_instance.respond_to?(name) ? @orm_instance.send(name,*args,&block) : super
+      pass_to_orm_instance(name) ? @orm_instance.send(name,*args,&block) : super
     end
     def respond_to?(name)
-      @orm_instance.respond_to?(name)||super
+      pass_to_orm_instance(name)||super
     end
-    private :method_missing,:respond_to?
+    def pass_to_orm_instance(name)
+      SupportedOrmMethods.include?(name)
+    end
+    private :method_missing,:respond_to?,:pass_to_orm_instance
+    SupportedOrmMethods = [:values]
+
+    def hash_form()
+      @orm_instance.values()
+    end
 
     class << self
       def inherited(subclass)
@@ -136,16 +144,20 @@ module DTK; module Common
       end
 
       def convert_raw_record(sequel_record,opts={})
-        return new(sequel_record)
-        ret = sequel_record.values
+        hash = sequel_record.values
         if opts[:no_nulls]
-          ret.each_key{|k|ret.delete(k) if ret[k].nil?}
+          hash.each_key{|k|hash.delete(k) if hash[k].nil?}
         end
         #TODO: simple processing that does not do mergeing
         (@json_fields||[]).each do |json_field|
-          ret[json_field] = convert_json_to_hash?(ret[json_field])
+          hash[json_field] = convert_json_to_hash?(hash[json_field])
         end
-        ret
+        if opts[:hash_form]
+          hash
+        else
+          sequel_record.set_values(hash) #TODO: this may not be needed since making changes anyways through side effect if changing hash
+          new(sequel_record)
+        end
       end
       #### END: overrides to straight passing to orm
 
