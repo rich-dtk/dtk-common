@@ -66,7 +66,7 @@ module DTK; module Common
     def pass_to_orm_instance(name)
       SupportedOrmMethods.include?(name)
     end
-    SupportedOrmMethods = [:values]
+    SupportedOrmMethods = [:values,"[]".to_sym]
 
    public
     class << self
