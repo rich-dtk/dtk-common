@@ -64,9 +64,8 @@ module DTK; module Common
     end
 
     def pass_to_orm_instance(name)
-      SupportedOrmMethods.include?(name)
+      @orm_instance.respond_to?(name)
     end
-    SupportedOrmMethods = [:values,"[]".to_sym]
 
    public
     class << self
@@ -93,8 +92,25 @@ module DTK; module Common
         element.delete()
       end
 
-     private
       ### overrides to straight passing to orm
+
+      def _one_to_many(name, opts={}, &block)
+        association_aux(:one_to_many,name,opts,&block)
+      end
+      def _many_to_many(name, opts={}, &block)
+        association_aux(:many_to_many,name,opts,&block)
+      end
+      def _many_to_one(name, opts={}, &block)
+        association_aux(:many_to_one,name,opts,&block)
+      end
+
+     private
+      def association_aux(method,model_name,opts={},&block)
+        model_class = Common::Aux.snake_to_camel_case(model_name.to_s).gsub(/s$/,"")
+        assoc_class = "#{self.to_s.gsub(/::[^:]+$/,"")}::#{model_class}::#{model_class}"
+        args = [model_name,{:class => assoc_class}.merge(opts)]
+        orm_handle().send(method,*args,&block)
+      end
 
       def _create(hash_values,opts={})
         convert_raw_record(orm_handle().create(preprocess_hash_values(hash_values)),opts)
