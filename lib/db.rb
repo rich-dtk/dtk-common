@@ -96,8 +96,8 @@ module DTK; module Common
      private
       ### overrides to straight passing to orm
 
-      def _create(hash_values)
-        orm_handle().create(preprocess_hash_values(hash_values))
+      def _create(hash_values,opts={})
+        convert_raw_record(orm_handle().create(preprocess_hash_values(hash_values)),opts)
       end
 
       def _all(opts={})
