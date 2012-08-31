@@ -55,7 +55,60 @@ module DTK; module Common
       self
     end
 
+    def self._delete(hash_filter)
+      unless hash_filter.keys == [:id]
+        raise Error.new("Not implemented yet: delete filter otehr than providing id")
+      end
+      unless element = orm_handle()[hash_filter[:id]]
+        raise ErrorUsage.new("There is no object of type (#{class_name()}) with id (#{hash_filter[:id].to_s})")
+      end
+      element.delete()
+    end
+    
+    def self._create(hash_values,opts={})
+      convert_raw_record(orm_handle().create(preprocess_hash_values(hash_values)),opts)
+    end
+
+    def self._all(opts={})
+      orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
+    end
+
+    def self._where(filter,opts={})
+      orm_handle().where(filter).map{|raw_record|convert_raw_record(raw_record,opts)}
+    end
+
+    def self._first(filter,opts={})
+      raw_row = orm_handle().first(filter)
+      raw_row && convert_raw_record(raw_row,opts)
+    end
+
+    def self.ret_if_exists_and_unique(filter,opts={})
+      rows = _where(filter,opts)
+      if rows.size == 1
+        rows.first 
+      elsif rows.size == 0
+        if opts[:raise_error]
+          raise ErrorUsage.new("Filter (#{pp_filter(filter)}) does not match any object of type #{object_type()}")
+        end
+      else # size > 1
+        if opts[:raise_error] or opts[:raise_error_if_not_unique]
+          raise ErrorUsage.new("Filter (#{pp_filter(filter)}) for object type #{object_type()} is ambiguous")
+        end
+      end
+    end
+
+
    private
+    def self._one_to_many(name, opts={}, &block)
+      association_aux(:one_to_many,name,opts,&block)
+    end
+    def self._many_to_many(name, opts={}, &block)
+      association_aux(:many_to_many,name,opts,&block)
+    end
+    def self._many_to_one(name, opts={}, &block)
+      association_aux(:many_to_one,name,opts,&block)
+    end
+
     def method_missing(name,*args,&block)
       pass_to_orm_instance(name) ? @orm_instance.send(name,*args,&block) : super
     end
@@ -82,51 +135,23 @@ module DTK; module Common
         (!!respond_to_mapped_name(name))||super
       end
 
-      def delete(hash_filter)
-        unless hash_filter.keys == [:id]
-          raise Error.new("Not implemented yet: delete filter otehr than providing id")
-        end
-        unless element = orm_handle()[hash_filter[:id]]
-          raise ErrorUsage.new("There is no object of type (#{class_name()}) with id (#{hash_filter[:id].to_s})")
-        end
-        element.delete()
-      end
-
-      ### overrides to straight passing to orm
-
-      def _one_to_many(name, opts={}, &block)
-        association_aux(:one_to_many,name,opts,&block)
-      end
-      def _many_to_many(name, opts={}, &block)
-        association_aux(:many_to_many,name,opts,&block)
-      end
-      def _many_to_one(name, opts={}, &block)
-        association_aux(:many_to_one,name,opts,&block)
-      end
-
      private
       def association_aux(method,model_name,opts={},&block)
         model_class = Common::Aux.snake_to_camel_case(model_name.to_s).gsub(/s$/,"")
         assoc_class = "#{self.to_s.gsub(/::[^:]+$/,"")}::#{model_class}::#{model_class}"
-        args = [model_name,{:class => assoc_class}.merge(opts)]
-        orm_handle().send(method,*args,&block)
-      end
-
-      def _create(hash_values,opts={})
-        convert_raw_record(orm_handle().create(preprocess_hash_values(hash_values)),opts)
-      end
-
-      def _all(opts={})
-        orm_handle().all().map{|raw_record|convert_raw_record(raw_record,opts)}
-      end
-
-      def _where(filter,opts={})
-        orm_handle().where(filter).map{|raw_record|convert_raw_record(raw_record,opts)}
-      end
-
-      def _first(filter,opts={})
-        raw_row = orm_handle().first(filter)
-        raw_row && convert_raw_record(raw_row,opts)
+        after_load_proc = proc do |x|
+          if x.kind_of?(Array)
+            x.map{|el|new(el)}
+          else
+            raise Error.new("Not implemented yet")
+          end
+        end
+        sequel_opts_defaults = {
+          :class => assoc_class,
+          :after_load => after_load_proc
+        }
+        sequel_opts = sequel_opts_defaults.merge(opts)
+        orm_handle().send(method,model_name,sequel_opts,&block)
       end
 
       def preprocess_hash_values(hash_values)
@@ -151,19 +176,6 @@ module DTK; module Common
 
       def extract_db_hash_assigns(hash)
         Aux.hash_subset(hash,_columns())
-      end
-
-      def ret_if_exists_and_unique(filter,opts={})
-        rows = _where(filter,opts)
-        if rows.size == 1
-          rows.first 
-        elsif opts[:raise_error]
-          if rows.size == 0
-            raise ErrorUsage.new("Filter (#{pp_filter(filter)}) does not match any object of type #{object_type()}")
-          else # size > 1
-            raise ErrorUsage.new("Filter (#{pp_filter(filter)}) for object type #{object_type()} is ambiguous")
-          end
-        end
       end
 
       def pp_filter(filter)
