@@ -187,17 +187,20 @@ module DTK; module Common
 
       def convert_raw_record(sequel_record,opts={})
         hash = sequel_record.values
-        if opts[:no_nulls]
-          hash.each_key{|k|hash.delete(k) if hash[k].nil?}
-        end
-        #TODO: simple processing that does not do mergeing
+
+        #TODO: simple processing that does not do merging
         (@json_fields||[]).each do |json_field|
           hash[json_field] = convert_json_to_hash?(hash[json_field])
         end
+
+        if opts[:no_nulls]
+          hash.each_key{|k|hash.delete(k) if hash[k].nil?}
+        end
+
         if opts[:hash_form]
           hash
         else
-          sequel_record.set_values(hash) #TODO: this may not be needed since making changes anyways through side effect if changing hash
+          #through side effects sequel_record is changed
           new(sequel_record)
         end
       end
