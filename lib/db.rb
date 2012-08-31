@@ -57,7 +57,7 @@ module DTK; module Common
 
     def self._delete(hash_filter)
       unless hash_filter.keys == [:id]
-        raise Error.new("Not implemented yet: delete filter otehr than providing id")
+        raise Error.new("Not implemented yet: delete filter other than providing id")
       end
       unless element = orm_handle()[hash_filter[:id]]
         raise ErrorUsage.new("There is no object of type (#{class_name()}) with id (#{hash_filter[:id].to_s})")
@@ -174,7 +174,7 @@ module DTK; module Common
       end
       public :preprocess_hash_values
 
-      def extract_db_hash_assigns(hash)
+      def extract_db_params(hash)
         Aux.hash_subset(hash,_columns())
       end
 
