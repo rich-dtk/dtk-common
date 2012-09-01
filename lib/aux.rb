@@ -18,6 +18,10 @@ module DTK
         end
       end
 
+      def convert_keys_to_symbols(hash)
+        hash.keys.inject(Hash.new){|h,k|h.merge(k.to_sym => hash[k])}
+      end
+
       def dtk_instance_repo_username()
         #on ec2 changing mac addresses; so selectively pick instance id on ec2
         unique_id = get_ec2_instance_id() || get_macaddress().gsub(/:/,'-')
