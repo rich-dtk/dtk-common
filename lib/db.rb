@@ -79,9 +79,9 @@ module DTK; module Common
       orm_handle().where(filter).map{|raw_record|convert_raw_record(raw_record,opts)}
     end
 
-    def self._first(filter,opts={})
-      filter_ok?(filter,:raise_error => true)
-      raw_row = orm_handle().first(filter)
+    def self.[](filter,opts={})
+      filter_ok?(filter,:scalar_allowed => true,:raise_error => true)
+      raw_row = orm_handle()[filter]
       raw_row && convert_raw_record(raw_row,opts)
     end
 
@@ -125,8 +125,8 @@ module DTK; module Common
 
     def self.filter_ok?(filter,opts={})
       error_msg =
-        if filter.kind_of?(Fixnum)
-        elsif filter.kind_of?(String)
+        if opts[:scalar_allowed] and filter.kind_of?(Fixnum)
+        elsif opts[:scalar_allowed] and filter.kind_of?(String)
           #TODO: assumes that primary key is an integer 
           if not filter.to_s =~ /^[0-9]+$/
             "Ill-formed id: '#{filter}'"
