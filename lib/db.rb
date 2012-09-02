@@ -59,7 +59,8 @@ module DTK; module Common
       unless hash_filter.keys == [:id]
         raise Error.new("Not implemented yet: delete filter other than providing id")
       end
-      unless element = orm_handle()[hash_filter[:id]]
+      filter_ok?(hash_filter,:raise_error => true)
+      unless element = orm_handle()[hash_filter]
         raise ErrorUsage.new("There is no object of type (#{class_name()}) with id (#{hash_filter[:id].to_s})")
       end
       element.delete()
@@ -74,15 +75,18 @@ module DTK; module Common
     end
 
     def self._where(filter,opts={})
+      filter_ok?(filter,:raise_error => true)
       orm_handle().where(filter).map{|raw_record|convert_raw_record(raw_record,opts)}
     end
 
     def self._first(filter,opts={})
+      filter_ok?(filter,:raise_error => true)
       raw_row = orm_handle().first(filter)
       raw_row && convert_raw_record(raw_row,opts)
     end
 
     def self.ret_if_exists_and_unique(filter,opts={})
+      filter_ok?(filter,:raise_error => true)
       rows = _where(filter,opts)
       if rows.size == 1
         rows.first 
@@ -96,7 +100,6 @@ module DTK; module Common
         end
       end
     end
-
 
    private
     def self._one_to_many(name, opts={}, &block)
@@ -118,6 +121,31 @@ module DTK; module Common
 
     def pass_to_orm_instance(name)
       @orm_instance.respond_to?(name)
+    end
+
+    def self.filter_ok?(filter,opts={})
+      error_msg =
+        if filter.kind_of?(Fixnum)
+        elsif filter.kind_of?(String)
+          #TODO: assumes that primary key is an integer 
+          if not filter.to_s =~ /^[0-9]+$/
+            "Ill-formed id: '#{filter}'"
+          end
+        elsif filter.kind_of?(Hash)
+          #TODO: just picking out first one
+          bad_key_field = filter.keys.find do |k| 
+            (k.to_s =~ /^id$/ or k.to_s =~ /_id$/) and not filter[k].to_s =~ /^[0-9]+$/
+          end
+          if bad_key_field
+            "Ill-formed id field (#{bad_key_field}): '#{filter[bad_key_field]}'"
+          end
+        else
+          "Ill-formed filter (#{filter.inspect})"
+        end
+      if opts[:raise_error] and error_msg
+        raise ErrorUsage.new(error_msg)
+      end
+      error_msg ? nil : true
     end
 
    public
