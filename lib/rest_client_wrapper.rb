@@ -77,6 +77,10 @@ module DTK
         def data()
           self[DataField]
         end
+
+        def set_data(*data_values)
+          self[DataField]=data_values
+        end
         
         def data_ret_and_remove!(*data_keys)
           data = data()
