@@ -9,12 +9,13 @@ module DTK
     class GritAdapter 
       require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
       require File.expand_path('grit_adapter/object_access', File.dirname(__FILE__))
-      def initialize(repo_dir,branch='master')
+      def initialize(repo_dir,branch=nil)
         @repo_dir = repo_dir
         @branch = branch
         @grit_repo = nil
         begin
           @grit_repo = ::Grit::Repo.new(repo_dir)
+          @branch ||= default_branch()
         rescue ::Grit::NoSuchPathError
           repo_name = repo_dir.split("/").last.gsub("\.git","")
           #TODO: change to usage error
@@ -23,6 +24,8 @@ module DTK
           raise e
         end
       end
+
+      attr_reader :branch
 
       def self.clone(target_repo_dir,git_server_url,opts={})
         if File.directory?(target_repo_dir)
@@ -79,7 +82,18 @@ module DTK
         git_command(:pull,"origin",@branch)
       end
 
-      private
+     private
+      def default_branch()
+        branches = branches()
+        if branches.include?('master')
+          return 'master'
+        elsif branches.size == 1
+          branches.first
+        else
+          raise Error.new("Cannot find a unique default branch")
+        end
+      end
+
       def tree()
         @grit_repo.tree(@branch)
       end
