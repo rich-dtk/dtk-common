@@ -41,7 +41,8 @@ module DTK
         ret = new(*[target_repo_dir,opts[:branch]].compact)
         #make sure remote branch exists; ::Grit::Git.new("").clone silently uses master if remote branch does not exist
         if branch = opts[:branch]
-          unless ret.branches().include?(opts[:branch])
+          branches = ret.branches()
+          unless branches.include?(opts[:branch])
             FileUtils.rm_rf target_repo_dir
             raise Error.new("Remote branch (#{opts[:branch]}) does not exist")
           end
