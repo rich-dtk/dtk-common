@@ -1,5 +1,5 @@
 #TODO: facter into multiple files
-require File.expand_path('aux', File.dirname(__FILE__))
+require File.expand_path('auxiliary', File.dirname(__FILE__))
 module DTK; module Common
   module ORMMixin
    private
