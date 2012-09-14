@@ -73,7 +73,7 @@ module DTK; module Common; class GritAdapter
       
       if other_sha == local_sha then :equal
       else
-        merge_sha = git_command(:merge_base,@branch,ref)
+        merge_sha = git_command__merge_base(@branch,ref)
         if merge_sha == local_sha then :local_behind
         elsif merge_sha == other_sha then :local_ahead
         else :branchpoint
@@ -85,6 +85,11 @@ module DTK; module Common; class GritAdapter
      def qualified_path(file_rel_path)
        "#{@repo_dir}/#{file_rel_path}"
      end
+
+    def git_command__merge_base(ref1,ref2)
+      #chomp added below because raw griot command has a cr at end of line
+      git_command(:merge_base,ref1,ref2).chomp
+    end
 
      #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
      def chdir_and_checkout(branch=nil,&block)
