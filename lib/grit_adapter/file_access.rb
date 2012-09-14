@@ -1,4 +1,4 @@
-module DTK::Common; class GritAdapter
+module DTK; module Common; class GritAdapter
   class FileAccess < self
     require File.expand_path('file_access/status', File.dirname(__FILE__))
     require File.expand_path('file_access/diff', File.dirname(__FILE__))
@@ -27,9 +27,9 @@ module DTK::Common; class GritAdapter
       end
     end
 
-    def fetch_branch(remote="origin")
+    def fetch(remote="origin")
       chdir_and_checkout do
-        git_command(:fetch,remote,@branch)
+        git_command(:fetch,remote)
       end
     end
 
@@ -46,6 +46,40 @@ module DTK::Common; class GritAdapter
       :username => "dtk",
       :email => "dtk@reactor8.com"
     }
+
+    #returns :equal, :local_behind, :local_ahead, or :branchpoint
+    #type can be :remote_branch or :local_branch
+    def ret_merge_relationship(type,ref,opts={})
+      if (type == :remote_branch and opts[:fetch_if_needed])
+        #TODO: this fetches all branches on the remote; see if anyway to just fetch a specfic branch
+        #ref will be of form remote_name/branch
+        fetch(ref.split("/").first)
+      end
+      other_grit_ref = 
+        case type
+         when :remote_branch
+          @grit_repo.remotes.find{|r|r.name == ref}
+         when :local_branch
+          @grit_repo.heads.find{|r|r.name == ref}
+         else
+          raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
+        end
+      unless other_grit_ref
+        raise Error.new("Cannot find git ref (#{ref})")
+      end
+      
+      other_sha = other_grit_ref.commit.id
+      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      
+      if other_sha == local_sha then :equal
+      else
+        merge_sha = git_command(:merge_base,@branch,ref)
+        if merge_sha == local_sha then :local_behind
+        elsif merge_sha == other_sha then :local_ahead
+        else :branchpoint
+        end
+      end
+    end
 
    private
      def qualified_path(file_rel_path)
@@ -67,5 +101,5 @@ module DTK::Common; class GritAdapter
        end
      end
    end
-end;end
+end;end;end
 

@@ -1,6 +1,6 @@
 module DTK::Common; class GritAdapter
   class ObjectAccess  < self 
-    def initialize(repo_dir,branch='master')
+    def initialize(repo_dir,branch=nil)
       super
       @grit_index = @grit_repo.index
     end

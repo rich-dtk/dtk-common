@@ -25,7 +25,7 @@ module DTK
         end
       end
 
-      attr_reader :branch
+      attr_reader :branch,:repo_dir
 
       def self.clone(target_repo_dir,git_server_url,opts={})
         if File.directory?(target_repo_dir)
