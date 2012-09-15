@@ -9,12 +9,12 @@ module DTK
     class GritAdapter 
       require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
       require File.expand_path('grit_adapter/object_access', File.dirname(__FILE__))
-      def initialize(repo_dir,branch=nil)
+      def initialize(repo_dir,branch=nil,opts={})
         @repo_dir = repo_dir
         @branch = branch
         @grit_repo = nil
         begin
-          @grit_repo = ::Grit::Repo.new(repo_dir)
+          @grit_repo = (opts[:init] ?  ::Grit::Repo.init(repo_dir) : ::Grit::Repo.new(repo_dir))
           @branch ||= default_branch()
         rescue ::Grit::NoSuchPathError
           repo_name = repo_dir.split("/").last.gsub("\.git","")
