@@ -78,28 +78,6 @@ module DTK
       end
       Git_command__push_mutex = Mutex.new
 
-      def pull()
-        git_command(:pull,"origin",@branch)
-      end
-
-      
-      def add_branch?(branch)
-        unless branches().include?(branch)
-          add_branch(branch)
-        end
-      end
-      def add_branch(branch)
-        git_command(:branch,branch)
-      end
-      def remove_branch?(branch)
-        if branches().include?(branch)
-          remove_branch(branch)
-        end
-      end
-      def remove_branch(branch)
-        git_command(:branch,"-d",branch)
-      end
-
       def add_remote?(remote_name,remote_url)
         unless remote_exists?(remote_name)
           add_remote(remote_name,remote_url)

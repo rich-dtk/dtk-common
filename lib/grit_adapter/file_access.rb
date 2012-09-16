@@ -81,6 +81,28 @@ module DTK; module Common; class GritAdapter
       end
     end
 
+    def add_branch?(branch)
+      unless branches().include?(branch)
+        add_branch(branch)
+      end
+    end
+    def add_branch(branch)
+      chdir_and_checkout() do 
+        git_command(:branch,branch)
+      end
+    end
+    def remove_branch?(branch)
+      if branches().include?(branch)
+        remove_branch(branch)
+      end
+    end
+    def remove_branch(branch)
+      checkout_branch = @branch
+      chdir_and_checkout(checkout_branch,:stay_on_checkout_branch => true) do
+        git_command(:branch,"-d",branch)
+      end
+    end
+
    private
      def qualified_path(file_rel_path)
        "#{@repo_dir}/#{file_rel_path}"
@@ -92,19 +114,19 @@ module DTK; module Common; class GritAdapter
     end
 
      #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
-     def chdir_and_checkout(branch=nil,&block)
-       branch ||= @branch
-       Dir.chdir(@repo_dir) do 
-         current_head = @grit_repo.head.name
-         git_command(:checkout,branch) unless current_head == branch
-         return unless block
-         ret = yield
-         unless current_head == branch
+    def chdir_and_checkout(branch=nil,opts={},&block)
+      branch ||= @branch
+      Dir.chdir(@repo_dir) do 
+        current_head = @grit_repo.head.name
+        git_command(:checkout,branch) unless current_head == branch
+        return unless block
+        ret = yield
+        unless opts[:stay_on_checkout_branch] or (current_head == branch)
            git_command(:checkout,current_head)
-         end
-         ret
-       end
-     end
-   end
+        end
+        ret
+      end
+    end
+  end
 end;end;end
 
