@@ -82,16 +82,32 @@ module DTK
         git_command(:pull,"origin",@branch)
       end
 
+      
+      def add_branch?(branch)
+        unless branches().include?(branch)
+          add_branch(branch)
+        end
+      end
+      def add_branch(branch)
+        git_command(:branch,branch)
+      end
+      def remove_branch?(branch)
+        if branches().include?(branch)
+          remove_branch(branch)
+        end
+      end
+      def remove_branch(branch)
+        git_command(:branch,"-d",branch)
+      end
+
       def add_remote?(remote_name,remote_url)
         unless remote_exists?(remote_name)
           add_remote(remote_name,remote_url)
         end
       end
-
       def add_remote(remote_name,remote_url)
         git_command(:remote,"add",remote_name,remote_url)
       end
-
       def add_or_update_remote(remote_name,remote_url)
         if remote_exists?(remote_name)
           git_command(:remote,"set-url",remote_name,remote_url)
