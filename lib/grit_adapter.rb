@@ -82,6 +82,24 @@ module DTK
         git_command(:pull,"origin",@branch)
       end
 
+      def add_remote?(remote_name,remote_url)
+        unless remote_exists?(remote_name)
+          add_remote(remote_name,remote_url)
+        end
+      end
+
+      def add_remote(remote_name,remote_url)
+        git_command(:remote,"add",remote_name,remote_url)
+      end
+
+      def add_or_update_remote(remote_name,remote_url)
+        if remote_exists?(remote_name)
+          git_command(:remote,"set-url",remote_name,remote_url)
+        else
+          add_remote(remote_name,remote_url)
+        end
+      end
+
      private
 
       def create_for_existing_repo(repo_dir)
@@ -92,10 +110,23 @@ module DTK
         grit_repo = ::Grit::Repo.init(repo_dir)
         if branch
           Dir.chdir(repo_dir) do
-            git_command_init(grit_repo,"symbolic-ref".to_sym,"HEAD","refs/heads/#{branch}")
+            git_command_during_init(grit_repo,"symbolic-ref".to_sym,"HEAD","refs/heads/#{branch}")
+            git_command_during_init(grit_repo,:commit,"--allow-empty","-m","initialize")
           end
         end
         grit_repo
+      end
+
+      def remote_exists?(remote_name)
+        ret_config_keys().include?("remote.#{remote_name}.url")
+      end
+
+      def ret_config_keys()
+        ::Grit::Config.new(@grit_repo).keys
+      end
+      
+      def ret_config_key_value(key)
+        ::Grit::Config.new(@grit_repo).fetch(key)
       end
 
       def default_branch()
@@ -142,7 +173,7 @@ module DTK
         ret
       end
 
-      def git_command_init(grit_repo,cmd,*args)
+      def git_command_during_init(grit_repo,cmd,*args)
         grit_repo.git.send(cmd, cmd_opts(),*args)
       end
       def git_command(cmd,*args)
