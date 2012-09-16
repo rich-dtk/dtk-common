@@ -14,7 +14,7 @@ module DTK
         @branch = branch
         @grit_repo = nil
         begin
-          @grit_repo = (opts[:init] ?  ::Grit::Repo.init(repo_dir) : ::Grit::Repo.new(repo_dir))
+          @grit_repo = (opts[:init] ?  init(repo_dir,branch) : create_for_existing_repo(repo_dir))
           @branch ||= default_branch()
         rescue ::Grit::NoSuchPathError
           repo_name = repo_dir.split("/").last.gsub("\.git","")
@@ -83,6 +83,21 @@ module DTK
       end
 
      private
+
+      def create_for_existing_repo(repo_dir)
+        ::Grit::Repo.new(repo_dir)
+      end
+
+      def init(repo_dir,branch=nil)
+        grit_repo = ::Grit::Repo.init(repo_dir)
+        if branch
+          Dir.chdir(repo_dir) do
+            git_command_init(grit_repo,"symbolic-ref".to_sym,"HEAD","refs/heads/#{branch}")
+          end
+        end
+        grit_repo
+      end
+
       def default_branch()
         branches = branches()
         if branches.include?('master')
@@ -127,6 +142,9 @@ module DTK
         ret
       end
 
+      def git_command_init(grit_repo,cmd,*args)
+        grit_repo.git.send(cmd, cmd_opts(),*args)
+      end
       def git_command(cmd,*args)
         @grit_repo.git.send(cmd, cmd_opts(),*args)
       end
