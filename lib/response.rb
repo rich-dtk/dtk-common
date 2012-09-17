@@ -2,18 +2,58 @@ require 'restclient'
 require 'json'
 module DTK
   module Common
-    module Rest
-      module ResponseTokens
-        StatusOK = "ok"
-        StatusNotok = "notok"
-        DataField = "data"
-        StatusField = "status"
-        ErrorsField = "errors"
-        ErrorsSubFieldCode = "code"
-        GenericError = "error"
+    module ResponseTokens
+      StatusOK = "ok"
+      StatusNotok = "notok"
+      DataField = "data"
+      StatusField = "status"
+      ErrorsField = "errors"
+      ErrorsSubFieldCode = "code"
+      GenericError = "error"
+    end
+
+    class Response < Hash
+      include ResponseTokens
+      def initialize(hash={})
+        super()
+        replace(hash)
+      end
+      def ok?()
+        self[StatusField] == StatusOK
       end
 
-      class ClientWrapper 
+      def data()
+        self[DataField]
+      end
+
+      def set_data(*data_values)
+        self[DataField]=data_values
+      end
+
+      def data_ret(*data_keys)
+        data = data()
+        data_keys.map{|key|data[key.to_s]}
+      end
+        
+      def data_ret_and_remove!(*data_keys)
+        data = data()
+        data_keys.map{|key|data.delete(key.to_s)}
+      end
+
+      module ErrorMixin
+        def ok?()
+          false
+        end
+      end
+
+      class Error < self
+        include ErrorMixin
+        def initialize(hash={})
+          super(hash)
+        end
+      end
+
+      class RestClientWrapper 
         class << self
           include ResponseTokens
           def get_raw(url,opts={},&block)
@@ -22,7 +62,7 @@ module DTK
               block ? block.call(raw_response) : raw_response
             end
           end
-
+        
           def get(url,opts={})
             get_raw(url,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
@@ -33,7 +73,7 @@ module DTK
               block ? block.call(raw_response) : raw_response
             end
           end
-
+        
           def post(url,body={},opts={})
             post_raw(url,body,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
@@ -41,7 +81,8 @@ module DTK
           def json_parse_if_needed(item)
             item.kind_of?(String) ? JSON.parse(item) : item
           end
-          private
+         private
+
           def error_handling(opts={},&block)
             begin
               block.call 
@@ -51,11 +92,12 @@ module DTK
               error_response({ErrorsSubFieldCode => GenericError},opts)
             end
           end 
+
           def error_response(error_or_errors,opts={})
             errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
             (opts[:error_response_class]||ResponseError).new(StatusField => StatusNotok, ErrorsField => errors)
           end
-
+          
           RestClientErrors = {
             "RestClient::InternalServerError" => "internal_server_error",
             "RestClient::RequestTimeout" => "timeout",
@@ -63,43 +105,6 @@ module DTK
           }
         end
       end
-
-      class Response < Hash
-        include ResponseTokens
-        def initialize(hash={})
-          super()
-          replace(hash)
-        end
-        def ok?()
-          self[StatusField] == StatusOK
-        end
-
-        def data()
-          self[DataField]
-        end
-
-        def set_data(*data_values)
-          self[DataField]=data_values
-        end
-        
-        def data_ret_and_remove!(*data_keys)
-          data = data()
-          data_keys.map{|key|data.delete(key.to_s)}
-        end
-      end
-
-      module ResponseErrorMixin
-        def ok?()
-          false
-        end
-      end
-      class ResponseError < Response
-        include ResponseErrorMixin
-        def initialize(hash={})
-          super(hash)
-        end
-      end
     end
   end
 end
-
