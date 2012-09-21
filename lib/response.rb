@@ -22,23 +22,33 @@ module DTK
         self[StatusField] == StatusOK
       end
 
-      def data()
-        self[DataField]
+      def data(*data_keys)
+        data = self[DataField]
+        case data_keys.size
+         when 0 then data
+         when 1 then data[internal_key_form(data_keys.first)]
+         else data_keys.map{|key|data[internal_key_form(key)]}
+        end
       end
 
       def set_data(*data_values)
         self[DataField]=data_values
       end
 
-      def data_ret(*data_keys)
-        data = data()
-        data_keys.map{|key|data[key.to_s]}
-      end
-        
       def data_ret_and_remove!(*data_keys)
         data = data()
-        data_keys.map{|key|data.delete(key.to_s)}
+        data_keys.map{|key|data.delete(internal_key_form(key))}
       end
+
+      def add_data_value!(key,value)
+        data()[key.to_s] = value
+        self
+      end
+
+      def internal_key_form(key)
+        key.to_s
+      end
+      private :internal_key_form
 
       module ErrorMixin
         def ok?()
