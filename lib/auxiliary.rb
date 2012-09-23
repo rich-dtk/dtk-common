@@ -45,6 +45,10 @@ module DTK
         @macaddress = collection.fact('macaddress').value
       end
 
+      def get_ec2_public_dns()
+        get_ec2_meta_data('public-hostname')
+      end
+
       def get_ec2_instance_id()
         # @ec2_instance_id_cached used because it could have tried to get this info and result was null
         return @ec2_instance_id if @ec2_instance_id_cached
