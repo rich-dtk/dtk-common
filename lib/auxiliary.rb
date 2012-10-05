@@ -1,3 +1,4 @@
+require 'etc'
 module DTK
   module Common
     module AuxMixin
