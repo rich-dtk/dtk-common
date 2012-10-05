@@ -77,11 +77,12 @@ module DTK
         ret
       end    
       WaitSec = 2
-  
-      def running_process_home_dir()
-        File.expand_path("~#{ENV['USER']}") 
+      def  running_process_user()
+        Etc.getpwuid(Process.uid).name
       end
-    
+      def running_process_home_dir()
+        Etc.getpwuid(Process.uid).dir
+      end
     end
     module Aux
       class << self
