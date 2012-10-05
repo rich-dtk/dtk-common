@@ -61,7 +61,14 @@ module DTK
         camel_case.gsub(/(^|_)(.)/) { $2.upcase }
       end
 
-      private
+      def  running_process_user()
+        Etc.getpwuid(Process.uid).name
+      end
+      def running_process_home_dir()
+        Etc.getpwuid(Process.uid).dir
+      end
+
+     private
       def get_ec2_meta_data(var)
        #Fragments taken from Puppetlabs facter ec2
         require 'open-uri'
@@ -78,12 +85,6 @@ module DTK
         ret
       end    
       WaitSec = 2
-      def  running_process_user()
-        Etc.getpwuid(Process.uid).name
-      end
-      def running_process_home_dir()
-        Etc.getpwuid(Process.uid).dir
-      end
     end
     module Aux
       class << self
