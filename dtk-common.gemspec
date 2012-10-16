@@ -14,5 +14,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = DtkCommon::VERSION
   
-  gem.add_dependency 'rdoc','~> 3.0.0'
+  gem.add_dependency 'rdoc','~> 3.12'
 end
