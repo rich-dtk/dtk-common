@@ -39,7 +39,7 @@ module DTK; module Common; class GritAdapter
       # NOTE: There is issue with grit and git. Where grit.status will report file changed (modified)
       # and git status will not. Grit registers changing file time-stamp as change while git doesn't. This would 
       # not be a problem but `git push` will fail because of this. Following is fix for that.
-      
+      output = git_command(:status)
       grit_files = @grit_repo.status.files.select { |k,v| (v.type =~ /(A|M)/ || v.untracked) }
       grit_files.select { |file| output.include?(file.first) }
     end
