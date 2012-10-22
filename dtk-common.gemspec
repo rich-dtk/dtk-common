@@ -13,4 +13,6 @@ Gem::Specification.new do |gem|
   gem.name          = "dtk-common"
   gem.require_paths = ["lib"]
   gem.version       = DtkCommon::VERSION
+  
+  gem.add_dependency 'rdoc','~> 3.12'
 end

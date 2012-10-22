@@ -1,10 +1,12 @@
+require 'colorize'
+
 module DTK; module Common; class GritAdapter
   class FileAccess < self
     require File.expand_path('file_access/status', File.dirname(__FILE__))
     require File.expand_path('file_access/diff', File.dirname(__FILE__))
     include StatusMixin
     include DiffMixin
-    def add_file(file_rel_path,content)
+    def add_file(file_rel_path, content=nil)
       content ||= String.new
       file_path = qualified_path(file_rel_path)
       chdir_and_checkout do
@@ -30,6 +32,55 @@ module DTK; module Common; class GritAdapter
     def fetch(remote="origin")
       chdir_and_checkout do
         git_command(:fetch,remote)
+      end
+    end
+
+    def changed_files()
+      # NOTE: There is issue with grit and git. Where grit.status will report file changed (modified)
+      # and git status will not. Grit registers changing file time-stamp as change while git doesn't. This would 
+      # not be a problem but `git push` will fail because of this. Following is fix for that.
+      output = git_command(:status)
+      grit_files = @grit_repo.status.files.select { |k,v| (v.type =~ /(A|M)/ || v.untracked) }
+      grit_files.select { |file| output.include?(file.first) }
+    end
+
+    def deleted_files()
+      @grit_repo.status.deleted()
+    end
+
+    def print_status()
+      changes = [@grit_repo.status.changed(), @grit_repo.status.untracked(), @grit_repo.status.deleted()]
+      puts "\nModified files:\n".colorize(:green) unless changes[0].empty?
+      changes[0].each { |item| puts "\t#{item.first}" }
+      puts "\nUntracked files:\n".colorize(:yellow) unless changes[1].empty?
+      changes[1].each { |item| puts "\t#{item.first}" }
+      puts "\nDeleted files:\n".colorize(:red) unless changes[2].empty?
+      changes[2].each { |item| puts "\t#{item.first}" }
+      puts ""
+    end
+
+    ##
+    # Checks for changes add/delete/modified
+    #
+    def changed?
+      !(changed_files() + deleted_files).empty?
+    end
+
+    ##
+    # Method will add and remove all files, after commit with given msg
+    #
+    def add_remove_commit_all(commit_msg)
+      Dir.chdir(@repo_dir) do
+        # modified, untracked
+        changed_files().each do |c_file|
+          add_file_command(c_file.first)
+        end
+        # deleted
+        deleted_files().each do |d_file|
+          remove_file(d_file.first)
+        end
+        # commit 
+        commit(commit_msg)
       end
     end
 
