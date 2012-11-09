@@ -62,10 +62,12 @@ module DTK
       end
 
       def  running_process_user()
-        Etc.getpwuid(Process.uid).name
+        # Etc.getpwuid(Process.uid).name  -- doesn't work on windows
+        Etc.getlogin
       end
       def running_process_home_dir()
-        Etc.getpwuid(Process.uid).dir
+        # Etc.getpwuid(Process.uid).dir  -- doesn't work on windows
+        File.expand_path('~')
       end
 
      private
