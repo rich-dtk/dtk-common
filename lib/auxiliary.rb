@@ -61,13 +61,28 @@ module DTK
         camel_case.gsub(/(^|_)(.)/) { $2.upcase }
       end
 
-      def  running_process_user()
-        # Etc.getpwuid(Process.uid).name  -- doesn't work on windows
-        Etc.getlogin
+      def platform_is_linux?()
+        RUBY_PLATFORM.downcase.include?("linux")
       end
+
+      def platform_is_windows?()
+        RUBY_PLATFORM.downcase.include?("mswin") or RUBY_PLATFORM.downcase.include?("mingw")
+      end
+
+      def  running_process_user()
+        if platform_is_windows?()
+          Etc.getlogin
+        else
+          Etc.getpwuid(Process.uid).name
+        end
+      end
+
       def running_process_home_dir()
-        # Etc.getpwuid(Process.uid).dir  -- doesn't work on windows
-        File.expand_path('~')
+        if platform_is_windows?()
+          File.expand_path('~')
+        else
+          Etc.getpwuid(Process.uid).dir
+        end
       end
 
      private
