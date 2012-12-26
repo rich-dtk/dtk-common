@@ -8,6 +8,7 @@ module DTK
       DataField = "data"
       StatusField = "status"
       ErrorsField = "errors"
+      ValidationField = "validation"
       ErrorsSubFieldCode = "code"
       GenericError = "error"
     end
@@ -20,6 +21,18 @@ module DTK
       end
       def ok?()
         self[StatusField] == StatusOK
+      end
+
+      def validation_response?
+        !self[ValidationField].nil?
+      end
+
+      def validation_message
+        self[ValidationField]['message']
+      end
+
+      def validation_actions
+        return self[ValidationField]['actions_needed']
       end
 
       def data(*data_keys)
