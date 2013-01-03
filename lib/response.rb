@@ -118,7 +118,7 @@ module DTK
 
           def error_response(error_or_errors,opts={})
             errors = error_or_errors.kind_of?(Hash) ? [error_or_errors] : error_or_errors
-            (opts[:error_response_class]||ResponseError).new(StatusField => StatusNotok, ErrorsField => errors)
+            (opts[:error_response_class]||Error).new(StatusField => StatusNotok, ErrorsField => errors)
           end
           
           RestClientErrors = {
