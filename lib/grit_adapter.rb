@@ -71,12 +71,24 @@ module DTK
         tree_or_blob && tree_or_blob.kind_of?(::Grit::Blob) && tree_or_blob.data
       end
 
-      def push()
+      def push(remote_branch_ref=nil)
+        remote_repo,remote_branch = parse_remote_branch_ref(remote_branch_ref)
         Git_command__push_mutex.synchronize do 
-          git_command(:push,"origin", "#{@branch}:refs/heads/#{@branch}")
+          git_command(:push,remote_repo||"origin", "#{@branch}:refs/heads/#{remote_branch||@branch}")
         end
       end
       Git_command__push_mutex = Mutex.new
+      #returns [remote_repo,remote_branch]
+      def parse_remote_branch_ref(remote_branch_ref)
+        if remote_branch_ref 
+          split = remote_branch_ref.split("/")
+          case split.size
+            when 1 then [nil,split[0]]
+            when 2 then split
+          end
+        end
+      end
+      private :parse_remote_branch_ref
 
       def add_remote?(remote_name,remote_url)
         unless remote_exists?(remote_name)
