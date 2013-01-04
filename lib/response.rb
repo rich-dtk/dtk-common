@@ -44,6 +44,24 @@ module DTK
         end
       end
 
+      def data_hash_form(*data_keys)
+        ret = Hash.new
+        unless data = self[DataField]
+          return ret
+        end
+
+        if data_keys.size == 0
+          data.inject(Hash.new){|h,(k,v)|h.merge(external_key_form(k) => v)}
+        else
+          data_keys.each do |k|
+            if v = data[internal_key_form(k)]
+              ret.merge!(external_key_form(k) => v)
+            end
+          end
+          ret
+        end
+      end
+
       def set_data(*data_values)
         self[DataField]=data_values
       end
@@ -61,7 +79,10 @@ module DTK
       def internal_key_form(key)
         key.to_s
       end
-      private :internal_key_form
+      def external_key_form(key)
+        key.to_sym
+      end
+      private :internal_key_form,:external_key_form
 
       module ErrorMixin
         def ok?()
