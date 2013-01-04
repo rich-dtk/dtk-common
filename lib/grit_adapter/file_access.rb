@@ -35,6 +35,12 @@ module DTK; module Common; class GritAdapter
       end
     end
 
+    def merge(remote_branch_ref)
+      chdir_and_checkout do
+        git_command(:merge,remote_branch_ref)
+      end
+    end
+
     def changed_files()
       # NOTE: There is issue with grit and git. Where grit.status will report file changed (modified)
       # and git status will not. Grit registers changing file time-stamp as change while git doesn't. This would 
