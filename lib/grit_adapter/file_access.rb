@@ -122,17 +122,21 @@ module DTK; module Common; class GritAdapter
           raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
         end
       unless other_grit_ref
+        if type == :remote_branch
+          return :no_remote_ref
+        end
         raise Error.new("Cannot find git ref (#{ref})")
       end
       
       other_sha = other_grit_ref.commit.id
       local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
       
-      if other_sha == local_sha then :equal
+      if other_sha == local_sha 
+        :equal
       else
-        merge_sha = git_command__merge_base(@branch,ref)
-        if merge_sha == local_sha then :local_behind
-        elsif merge_sha == other_sha then :local_ahead
+        #shas can be different but  they can have same content so do a git diff
+        if git_command__rev_list_contains?(local_sha,other_sha) then :local_ahead
+        elsif git_command__rev_list_contains?(other_sha,local_sha) then :local_behind
         else :branchpoint
         end
       end
@@ -165,9 +169,10 @@ module DTK; module Common; class GritAdapter
        "#{@repo_dir}/#{file_rel_path}"
      end
 
-    def git_command__merge_base(ref1,ref2)
-      #chomp added below because raw griot command has a cr at end of line
-      git_command(:merge_base,ref1,ref2).chomp
+    def git_command__rev_list_contains?(container_sha,index_sha)
+      #chomp added below because raw grit command has a cr at end of line
+      rev_list = git_command(:rev_list,container_sha)
+      rev_list.split("\n").grep(index_sha)
     end
 
      #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
