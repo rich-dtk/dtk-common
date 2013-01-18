@@ -135,6 +135,10 @@ module DTK; module Common; class GritAdapter
         :equal
       else
         #shas can be different but  they can have same content so do a git diff
+        unless any_diffs?(local_sha,other_sha)
+          return :equal
+        end
+        #TODO: see if missing or mis-categorizing any condition below
         if git_command__rev_list_contains?(local_sha,other_sha) then :local_ahead
         elsif git_command__rev_list_contains?(other_sha,local_sha) then :local_behind
         else :branchpoint
@@ -175,7 +179,12 @@ module DTK; module Common; class GritAdapter
       rev_list.split("\n").grep(index_sha)
     end
 
-     #TODO: otehr than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
+    #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary
+    def any_diffs?(ref1,ref2)
+      not @grit_repo.diff(ref1,ref2).empty?
+    end
+
+     #TODO: other than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
     def chdir_and_checkout(branch=nil,opts={},&block)
       branch ||= @branch
       Dir.chdir(@repo_dir) do 
