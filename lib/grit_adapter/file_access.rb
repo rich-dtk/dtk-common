@@ -121,15 +121,22 @@ module DTK; module Common; class GritAdapter
          else
           raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
         end
+
+      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      if opts[:ret_commit_shas]
+        opts[:ret_commit_shas][:local_sha] = local_sha
+      end
+
       unless other_grit_ref
         if type == :remote_branch
           return :no_remote_ref
         end
         raise Error.new("Cannot find git ref (#{ref})")
       end
-      
       other_sha = other_grit_ref.commit.id
-      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      if opts[:ret_commit_shas]
+        opts[:ret_commit_shas][:other_sha] = other_sha
+      end
       
       if other_sha == local_sha 
         :equal
