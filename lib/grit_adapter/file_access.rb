@@ -110,6 +110,7 @@ module DTK; module Common; class GritAdapter
       if (type == :remote_branch and opts[:fetch_if_needed])
         #TODO: this fetches all branches on the remote; see if anyway to just fetch a specfic branch
         #ref will be of form remote_name/branch
+        #TODO: also see if more efficient to use git ls-remote
         fetch(ref.split("/").first)
       end
       other_grit_ref = 
@@ -151,6 +152,11 @@ module DTK; module Common; class GritAdapter
         else :branchpoint
         end
       end
+    end
+
+    def find_remote_sha(ref)
+      remote = @grit_repo.remotes.find{|r|r.name == ref}
+      remote && remote.commit.id
     end
 
     def add_branch?(branch)
