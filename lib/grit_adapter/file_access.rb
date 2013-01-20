@@ -187,9 +187,8 @@ module DTK; module Common; class GritAdapter
      end
 
     def git_command__rev_list_contains?(container_sha,index_sha)
-      #chomp added below because raw grit command has a cr at end of line
       rev_list = git_command(:rev_list,container_sha)
-      rev_list.split("\n").grep(index_sha)
+      !rev_list.split("\n").grep(index_sha).empty?()
     end
 
     #TODO: would like more efficient way of doing this as opposed to below which first produces object with full diff as opposed to summary
