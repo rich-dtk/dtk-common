@@ -123,7 +123,7 @@ module DTK; module Common; class GritAdapter
           raise Error.new("Illegal type parameter (#{type}) passed to ret_merge_relationship") 
         end
 
-      local_sha = @grit_repo.heads.find{|r|r.name == @branch}.commit.id
+      local_sha = head_commit_sha()
       if opts[:ret_commit_shas]
         opts[:ret_commit_shas][:local_sha] = local_sha
       end
@@ -154,6 +154,10 @@ module DTK; module Common; class GritAdapter
       end
     end
 
+    def head_commit_sha()
+      head = @grit_repo.heads.find{|r|r.name == @branch}
+      head&& head.commit.id
+    end
     def find_remote_sha(ref)
       remote = @grit_repo.remotes.find{|r|r.name == ref}
       remote && remote.commit.id
