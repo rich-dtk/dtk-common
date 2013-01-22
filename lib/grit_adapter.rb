@@ -106,6 +106,10 @@ module DTK
         end
       end
 
+      def create_empty_branch(branch_name)
+        git_command("symbolic-ref".to_sym,"HEAD","refs/heads/#{branch_name}")
+      end
+
      private
 
       def create_for_existing_repo(repo_dir)

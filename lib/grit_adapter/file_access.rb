@@ -29,8 +29,16 @@ module DTK; module Common; class GritAdapter
       end
     end
 
-    def fetch(remote="origin")
-      chdir_and_checkout do
+    def pull(remote_branch,local_branch,remote=nil)
+      remote ||= default_remote()
+      chdir do
+        git_command(:pull,remote,"#{remote_branch}:#{local_branch}")
+      end
+    end
+
+    def fetch(remote=nil)
+      remote ||= default_remote()
+      chdir do
         git_command(:fetch,remote)
       end
     end
@@ -76,7 +84,7 @@ module DTK; module Common; class GritAdapter
     # Method will add and remove all files, after commit with given msg
     #
     def add_remove_commit_all(commit_msg)
-      Dir.chdir(@repo_dir) do
+      chdir do
         # modified, untracked
         changed_files().each do |c_file|
           add_file_command(c_file.first)
@@ -186,9 +194,13 @@ module DTK; module Common; class GritAdapter
     end
 
    private
-     def qualified_path(file_rel_path)
-       "#{@repo_dir}/#{file_rel_path}"
-     end
+    def default_remote()
+      "origin"
+    end
+
+    def qualified_path(file_rel_path)
+      "#{@repo_dir}/#{file_rel_path}"
+    end
 
     def git_command__rev_list_contains?(container_sha,index_sha)
       rev_list = git_command(:rev_list,container_sha)
@@ -200,10 +212,10 @@ module DTK; module Common; class GritAdapter
       not @grit_repo.diff(ref1,ref2).empty?
     end
 
-     #TODO: other than to write file to directory may not need to chdir becauselooks liek grit uses --git-dir option
+    #TODO: may  determine where --git-dir option makes an actual chdir unnecssary
     def chdir_and_checkout(branch=nil,opts={},&block)
       branch ||= @branch
-      Dir.chdir(@repo_dir) do 
+      chdir do 
         current_head = @grit_repo.head.name
         git_command(:checkout,branch) unless current_head == branch
         return unless block
@@ -214,6 +226,11 @@ module DTK; module Common; class GritAdapter
         ret
       end
     end
+
+    def chdir(&block)
+      Dir.chdir(@repo_dir){yield}
+    end
+
   end
 end;end;end
 
