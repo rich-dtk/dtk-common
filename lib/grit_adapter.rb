@@ -14,7 +14,7 @@ module DTK
         @branch = branch
         @grit_repo = nil
         begin
-          @grit_repo = (opts[:init] ?  init(repo_dir,branch) : create_for_existing_repo(repo_dir))
+          @grit_repo = (opts[:init] ?  init(repo_dir,branch,opts) : create_for_existing_repo(repo_dir,opts))
           @branch ||= default_branch()
         rescue ::Grit::NoSuchPathError
           repo_name = repo_dir.split("/").last.gsub("\.git","")
@@ -106,22 +106,20 @@ module DTK
         end
       end
 
-      def create_empty_branch(branch_name)
-        git_command("symbolic-ref".to_sym,"HEAD","refs/heads/#{branch_name}")
-      end
-
      private
 
-      def create_for_existing_repo(repo_dir)
+      def create_for_existing_repo(repo_dir,opts={})
         ::Grit::Repo.new(repo_dir)
       end
 
-      def init(repo_dir,branch=nil)
+      def init(repo_dir,branch=nil,opts={})
         grit_repo = ::Grit::Repo.init(repo_dir)
         if branch
           Dir.chdir(repo_dir) do
             git_command_during_init(grit_repo,"symbolic-ref".to_sym,"HEAD","refs/heads/#{branch}")
-            git_command_during_init(grit_repo,:commit,"--allow-empty","-m","initialize")
+            unless opts[:no_initial_commit]
+              git_command_during_init(grit_repo,:commit,"--allow-empty","-m","initialize")
+            end
           end
         end
         grit_repo
