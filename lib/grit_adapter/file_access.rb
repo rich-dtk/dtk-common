@@ -164,7 +164,7 @@ module DTK; module Common; class GritAdapter
 
     def head_commit_sha()
       head = @grit_repo.heads.find{|r|r.name == @branch}
-      head&& head.commit.id
+      head && head.commit.id
     end
     def find_remote_sha(ref)
       remote = @grit_repo.remotes.find{|r|r.name == ref}
