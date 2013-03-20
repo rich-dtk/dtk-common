@@ -109,6 +109,9 @@ module DTK
      private
 
       def create_for_existing_repo(repo_dir,opts={})
+        unless Dir.entries(repo_dir).include?(".git")
+          raise DTK::Client::DtkError, "#{repo_dir} does not contain .git folder." 
+        end
         ::Grit::Repo.new(repo_dir)
       end
 
