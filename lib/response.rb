@@ -31,6 +31,10 @@ module DTK
         self[ValidationField]['message']
       end
 
+      def error_message
+        self["errors"] ? (self["errors"].map { |e| e["message"]}).join(', ') : nil
+      end
+
       def validation_actions
         return self[ValidationField]['actions_needed']
       end
