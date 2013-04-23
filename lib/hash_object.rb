@@ -9,8 +9,9 @@ module DTK
       end
     end
 
-    require 'active_support/ordered_hash'
-    class SimpleOrderedHash < ::ActiveSupport::OrderedHash
+    # require 'active_support/ordered_hash'
+    # class SimpleOrderedHash < ::ActiveSupport::OrderedHash
+    class SimpleOrderedHash < Hash
       def initialize(elements=[])
         super()
         elements = [elements] unless elements.kind_of?(Array)
