@@ -36,12 +36,6 @@ module DTK; module Common; class GritAdapter
       end
     end
 
-    def reset_hard(remote_branch_ref)
-      chdir do
-        git_command(:reset,"--hard",remote_branch_ref)
-      end
-    end
-
     def fetch(remote=nil)
       remote ||= default_remote()
       chdir do
@@ -49,9 +43,13 @@ module DTK; module Common; class GritAdapter
       end
     end
 
-    def merge(remote_branch_ref)
+    def merge(remote_branch_ref,opts={})
       chdir_and_checkout do
-        git_command(:merge,remote_branch_ref)
+        cmd_array = [:merge,remote_branch_ref]
+        if opts[:strategy_option]
+          cmd_array += ["-s","recursive","-X",opts[:strategy_option]]
+        end
+        git_command(*cmd_array)
       end
     end
 
