@@ -43,13 +43,22 @@ module DTK; module Common; class GritAdapter
       end
     end
 
-    def merge(remote_branch_ref,opts={})
+    #temp branch #TODO: make sure no name conflict
+    TempBranch = 'temp_branch'
+    def merge_theirs(remote_branch_ref)
+      #since there is no 'git merge -s theirs' we need to simulate it
+      chdir do
+        git_command(:checkout,"-b",TempBranch,remote_branch_ref)
+        git_command(:merge,@branch,"-s","ours")
+        git_command(:checkout,@branch)
+        git_command(:reset,"--hard",TempBranch)
+        git_command(:branch,"-D",TempBranch)
+      end
+    end
+
+    def merge(remote_branch_ref)
       chdir_and_checkout do
-        cmd_array = [:merge,remote_branch_ref]
-        if opts[:strategy_option]
-          cmd_array += ["-s","recursive","-X",opts[:strategy_option]]
-        end
-        git_command(*cmd_array)
+        git_command(:merge,remote_branch_ref)
       end
     end
 
