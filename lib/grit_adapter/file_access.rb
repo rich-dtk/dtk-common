@@ -36,6 +36,12 @@ module DTK; module Common; class GritAdapter
       end
     end
 
+    def reset_hard(remote_branch_ref)
+      chdir do
+        git_command(:reset,"--hard",remote_branch_ref)
+      end
+    end
+
     def fetch(remote=nil)
       remote ||= default_remote()
       chdir do
