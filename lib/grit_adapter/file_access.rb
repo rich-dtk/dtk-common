@@ -43,6 +43,19 @@ module DTK; module Common; class GritAdapter
       end
     end
 
+    #temp branch #TODO: make sure no name conflict
+    TempBranch = 'temp_branch'
+    def merge_theirs(remote_branch_ref)
+      #since there is no 'git merge -s theirs' we need to simulate it
+      chdir do
+        git_command(:checkout,"-b",TempBranch,remote_branch_ref)
+        git_command(:merge,@branch,"-s","ours")
+        git_command(:checkout,@branch)
+        git_command(:reset,"--hard",TempBranch)
+        git_command(:branch,"-D",TempBranch)
+      end
+    end
+
     def merge(remote_branch_ref)
       chdir_and_checkout do
         git_command(:merge,remote_branch_ref)
@@ -55,11 +68,18 @@ module DTK; module Common; class GritAdapter
       # not be a problem but `git push` will fail because of this. Following is fix for that.
       output = git_command(:status)
       grit_files = @grit_repo.status.files.select { |k,v| (v.type =~ /(A|M)/ || v.untracked) }
-      grit_files.select { |file| output.include?(file.first) }
+      changed_files = grit_files.select do |file|
+        file_name = file.instance_of?(String) ? file : file.first
+        output.include?(file_name)
+      end
+
+      # returns array of arrays (first element name of file)
+      changed_files.to_a
     end
 
     def deleted_files()
-      @grit_repo.status.deleted()
+      # returns array of arrays (first element name of file)
+      @grit_repo.status.deleted().to_a 
     end
 
     def print_status()
@@ -112,8 +132,8 @@ module DTK; module Common; class GritAdapter
       :email => "dtk@reactor8.com"
     }
 
-    #returns :equal, :local_behind, :local_ahead, or :branchpoint
-    #type can be :remote_branch or :local_branch
+    # returns :equal, :local_behind, :local_ahead, or :branchpoint
+    # type can be :remote_branch or :local_branch
     def ret_merge_relationship(type,ref,opts={})
       if (type == :remote_branch and opts[:fetch_if_needed])
         #TODO: this fetches all branches on the remote; see if anyway to just fetch a specfic branch
@@ -190,10 +210,22 @@ module DTK; module Common; class GritAdapter
       checkout_branch = @branch
       chdir_and_checkout(checkout_branch,:stay_on_checkout_branch => true) do
         git_command(:branch,"-d",branch)
-      end
+      end.first
     end
 
    private
+
+    # 
+    # There is issue with Grit 1.8.7 and 1.9.3 version have diffrent returns on changed/deleted files
+    #
+    # 1.8.7 => Returns array of arrays where file name is first elemenet
+    # 1.9.3 => Returns hash where keys are file names
+    #
+    # No need for it now, but when refactoring code use this instead of .to_a fix
+    def grit_compability_transform(grit_files)
+      grit_files.instance_of?(Hash) ? grit_files.keys : grit_files.collect { |element| element.first }
+    end
+
     def default_remote()
       "origin"
     end
@@ -230,6 +262,8 @@ module DTK; module Common; class GritAdapter
     def chdir(&block)
       Dir.chdir(@repo_dir){yield}
     end
+
+
 
   end
 end;end;end

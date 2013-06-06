@@ -131,13 +131,13 @@ module DTK
           end
          private
 
-          def error_handling(opts={},&block)
+          def error_handling(opts={},&block)            
             begin
               block.call 
-            rescue ::RestClient::Forbidden,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
+            rescue ::RestClient::ServerBrokeConnection,::RestClient::Forbidden,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
               error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts)
             rescue Exception => e
-              error_response({ErrorsSubFieldCode => GenericError},opts)
+              error_response({ErrorsSubFieldCode => e.class.to_s},opts)
             end
           end 
 
@@ -148,6 +148,7 @@ module DTK
           
           RestClientErrors = {
             "RestClient::Forbidden" => "forbidden",
+            "RestClient::ServerBrokeConnection" => "broken",
             "RestClient::Request::Unauthorized" => "unauthorized",
             "RestClient::InternalServerError" => "internal_server_error",
             "RestClient::RequestTimeout" => "timeout",

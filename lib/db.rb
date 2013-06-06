@@ -9,10 +9,12 @@ module DTK; module Common
   end
   module ORMClassMixin
     def migration_class()
-      ::Sequel
+      raise "Sequel dependency has been removed, contact Haris to refactor this! @migration_class"
+      #::Sequel
     end
-    def ORMModel() 
-      ::Sequel::Model 
+    def ORMModel()
+      raise "Sequel dependency has been removed, contact Haris to refactor this! @ORMModel"
+      #::Sequel::Model 
     end
   end
 

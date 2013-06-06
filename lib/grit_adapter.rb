@@ -5,6 +5,7 @@ require 'thread'
 
 module DTK
   module Common
+
     require File.expand_path('require_first',File.dirname(__FILE__))
     class GritAdapter 
       require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
@@ -58,6 +59,10 @@ module DTK
         @grit_repo.branches.map{|h|h.name}
       end
 
+      def remotes()
+        @grit_repo.remotes
+      end
+
       def ls_r(depth=nil,opts={})
         tree_contents = tree.contents
         ls_r_aux(depth,tree_contents,opts)
@@ -73,6 +78,7 @@ module DTK
       end
 
       def push(remote_branch_ref=nil)
+        puts "Pushing to branch #{remote_branch_ref}"
         remote_repo,remote_branch = parse_remote_branch_ref(remote_branch_ref)
         Git_command__push_mutex.synchronize do 
           git_command(:push,remote_repo||"origin", "#{@branch}:refs/heads/#{remote_branch||@branch}")
