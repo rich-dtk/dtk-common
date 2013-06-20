@@ -3,14 +3,14 @@ require 'json'
 module DtkCommon
   module DSL             
     class FileParser
-      def initialize(input_processor)
-        @input_processor = input_processor
+      def initialize(input_hash_class)
+        @input_hash_class = input_hash_class
       end
 
       def self.parse_content(file_type,file_content,opts={})
         file_parser = Loader.file_parser(file_type,opts[:version])
-        hash_content = convert_json_content_to_hash(file_content)
-        file_parser.parse_hash_content_aux(hash_content)
+        raw_hash_content = convert_json_content_to_hash(file_content)
+        file_parser.parse_hash_content_aux(raw_hash_content)
       end
 
       def parse_hash_content_aux(raw_hash)
@@ -29,7 +29,7 @@ module DtkCommon
       class HashOutput < SimpleHashObject
       end
 
-      class InputProcessor < SimpleHashObject
+      class InputHash < SimpleHashObject
         #to provide autovification and use of symbol indexes
         def [](index)
           val = super(index.to_s)||{}
@@ -40,7 +40,7 @@ module DtkCommon
 
      private
       def input_form(raw_hash)
-        @input_processor.new(raw_hash)
+        @input_hash_class.new(raw_hash)
       end
 
       def self.convert_json_content_to_hash(json_file_content)
@@ -76,8 +76,8 @@ module DtkCommon
 
           base_class = FileParser.const_get(Aux.snake_to_camel_case(file_type.to_s))
           ret_class = base_class.const_get("V#{version.to_s}")
-          input_processor = ret_class.const_get "InputProcessor"
-          ret = ret_class.new(input_processor)
+          input_hash_class = ret_class.const_get "InputHash"
+          ret = ret_class.new(input_hash_class)
           (@loaded_types[file_type] ||= Hash.new)[version] = ret
           ret
         end

@@ -10,4 +10,5 @@ Dir['fixtures/dsl_test1/*/*'].each do |component_module_refs_rel_path|
   puts "processing service module #{service_mod.gsub(/^sm-/,'')}:\n"
   file_content = File.open(cmr_path).read()
   pp DtkCommon::DSL::FileParser.parse_content(:component_module_refs,file_content)
+  puts "\n"
 end
