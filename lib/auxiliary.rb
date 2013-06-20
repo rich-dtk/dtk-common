@@ -57,8 +57,8 @@ module DTK
         @ec2_instance_id = get_ec2_meta_data('instance-id')
       end
 
-      def snake_to_camel_case(camel_case)
-        camel_case.gsub(/(^|_)(.)/) { $2.upcase }
+      def snake_to_camel_case(snake_case)
+        snake_case.gsub(/(^|_)(.)/) { $2.upcase }
       end
 
       def platform_is_linux?()
