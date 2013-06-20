@@ -1,11 +1,12 @@
 require 'singleton'
+require 'json'
 module DtkCommon
   module DSL             
     class FileParser
       def self.parse_content(file_type,file_content,opts={})
         file_parser = Loader.file_parser(file_type,opts[:version])
-        hash_content = {} #TODO: stub
-        pp file_parser.parse_hash_content(hash_content)
+        hash_content = convert_json_content_to_hash(file_content)
+        file_parser.parse_hash_content(hash_content)
       end
       class Output
         class ArrayOutput < Array
@@ -24,7 +25,25 @@ module DtkCommon
           end
         end
       end
-     private
+
+      class ErrorUsage
+        #when error is content does not have JSON
+        class JSONParse < self
+        end
+        #when error is dtk content
+        class DTKParse < ErrorUsage
+        end
+      end
+
+      private
+      def self.convert_json_content_to_hash(json_file_content)
+        begin 
+          JSON.parse(json_file_content)
+        rescue => e
+          raise ErrorUsage::JSONParse.new(e.to_s)
+        end
+      end
+
       class Loader
         include Singleton
         def self.file_parser(file_type,version=nil)

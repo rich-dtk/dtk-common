@@ -5,6 +5,8 @@ module DtkCommon
     #stub
     class Error < NameError
     end
+    class ErrorUsage < Error
+    end
     module Aux
       extend DTK::Common::AuxMixin
     end
