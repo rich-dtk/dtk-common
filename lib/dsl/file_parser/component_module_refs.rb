@@ -1,7 +1,7 @@
 module DtkCommon; module DSL
   class FileParser
     class ComponentModuleRefs < self
-      class Output < FileParser::Output::ArrayOutput
+      class ArrayOutput < FileParser::ArrayOutput
         def self.keys_for_row()
           [:component_module,:version_info,:remote_namespace]
         end

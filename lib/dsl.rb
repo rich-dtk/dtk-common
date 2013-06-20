@@ -1,5 +1,6 @@
 require File.expand_path('auxiliary', File.dirname(__FILE__))
 require File.expand_path('log', File.dirname(__FILE__))
+require File.expand_path('hash_object', File.dirname(__FILE__))
 module DtkCommon
   module DSL    
 
@@ -13,7 +14,7 @@ module DtkCommon
     class ErrorUsage < Error
     end
     Log = ::DTK::Log
-
+    SimpleHashObject = ::DTK::Common::SimpleHashObject
     module Aux
       extend ::DTK::Common::AuxMixin
     end
