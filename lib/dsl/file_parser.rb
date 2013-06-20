@@ -4,7 +4,25 @@ module DtkCommon
     class FileParser
       def self.parse_content(file_type,file_content,opts={})
         file_parser = Loader.file_parser(file_type,opts[:version])
-        pp file_parser
+        hash_content = {} #TODO: stub
+        pp file_parser.parse_hash_content(hash_content)
+      end
+      class Output
+        class ArrayOutput < Array
+          def <<(hash_el)
+            bad_keys = hash_el.keys - self.class.keys_for_row()
+            unless bad_keys.empty?
+              raise Error.new("Illegal keys being inserted in ArrayOutput (#{bad_keys.join(',')})")
+            end
+            super
+          end
+        end
+        class HashOutput < Hash
+          def initialize(initial_val=nil)
+            super()
+            replace(initial_val) if initial_val
+          end
+        end
       end
      private
       class Loader

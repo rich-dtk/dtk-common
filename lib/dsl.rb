@@ -9,7 +9,7 @@ module DtkCommon
       extend DTK::Common::AuxMixin
     end
     require File.expand_path('dsl/file_parser', File.dirname(__FILE__))
-    #TODO: built on file_parser is parsier then understands directory structure and knows which files have which semantic types
+    #TODO: built on file_parser is functions that understands directory structure and knows which files have which semantic types
   end
 end
 require 'pp'
