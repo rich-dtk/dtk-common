@@ -26,20 +26,11 @@ module DtkCommon
         end
       end
 
-      class ErrorUsage
-        #when error is content does not have JSON
-        class JSONParse < self
-        end
-        #when error is dtk content
-        class DTKParse < ErrorUsage
-        end
-      end
-
       private
       def self.convert_json_content_to_hash(json_file_content)
         begin 
-          JSON.parse(json_file_content)
-        rescue => e
+          ::JSON.parse(json_file_content)
+        rescue ::JSON::ParserError => e
           raise ErrorUsage::JSONParse.new(e.to_s)
         end
       end
@@ -86,6 +77,15 @@ module DtkCommon
         FileTypeVesisonDefaults = {
           :component_module_refs => 1
         }
+      end
+    end
+
+    class ErrorUsage
+      #when error is content does not have JSON
+      class JSONParse < self
+      end
+      #when error is dtk content
+      class DTKParse < ErrorUsage
       end
     end
   end

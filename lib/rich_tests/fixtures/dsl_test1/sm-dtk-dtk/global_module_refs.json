@@ -1,0 +1,7 @@
+{
+  "component_modules": {
+    "gitolite" : "0.0.1",
+    "dtk_repo_manager": "0.0.1",
+    "thin": "0.0.1"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "component_modules": {
+    "dtk_postgresql": "0.1.0",
+    "gitolite": "0.1.0",
+    "common_user": "0.1.0",
+    "dtk_server": "0.1.0"
+  }
+}
