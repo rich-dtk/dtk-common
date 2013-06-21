@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-lib_root = '../'
+lib_root = '../lib'
 require File.expand_path("#{lib_root}/dsl",File.dirname(__FILE__))
 require 'pp'
 Dir['fixtures/dsl_test1/*/*'].each do |component_module_refs_rel_path|

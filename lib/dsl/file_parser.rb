@@ -17,16 +17,24 @@ module DtkCommon
         parse_hash_content(input_form(raw_hash))
       end
 
-      class ArrayOutput < Array
+      class OutputArray < Array
         def <<(hash_el)
           bad_keys = hash_el.keys - self.class.keys_for_row()
           unless bad_keys.empty?
-            raise Error.new("Illegal keys being inserted in ArrayOutput (#{bad_keys.join(',')})")
+            raise Error.new("Illegal keys being inserted in OutputArray (#{bad_keys.join(',')})")
           end
           super
         end
       end
-      class HashOutput < SimpleHashObject
+      class OutputHash < SimpleHashObject
+        def only_has_keys?(*only_has_keys)
+          (keys() - only_has_keys).empty?
+        end
+        
+        def merge_non_empty!(hash)
+          each{|k,v| merge!(k => v) unless v.nil? or v.empty?}
+          self
+        end
       end
 
       class InputHash < SimpleHashObject
@@ -36,7 +44,6 @@ module DtkCommon
           (val.kind_of?(Hash) ? self.class.new(val) : val)
         end
       end
-
 
      private
       def input_form(raw_hash)
