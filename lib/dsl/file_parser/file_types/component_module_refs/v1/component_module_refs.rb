@@ -19,7 +19,8 @@ module DtkCommon; module DSL; class FileParser
             new_el.merge_non_empty!(:version_info => v)
           end
           if parse_error
-            raise ErrorUsage::DTKParse.new("Ill-formed term (#{v.inspect})")
+            err_msg = (parse_error.kind_of?(String) ? parse_error : "Ill-formed term (#{v.inspect})")
+            raise ErrorUsage::DTKParse.new(err_msg)
           else
             ret << new_el
           end

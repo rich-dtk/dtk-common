@@ -27,21 +27,34 @@ module DtkCommon
         end
       end
       class OutputHash < SimpleHashObject
-        def only_has_keys?(*only_has_keys)
-          (keys() - only_has_keys).empty?
-        end
-        
         def merge_non_empty!(hash)
-          each{|k,v| merge!(k => v) unless v.nil? or v.empty?}
+          hash.each{|k,v| merge!(k => v) unless v.nil? or v.empty?}
           self
         end
       end
 
-      class InputHash < SimpleHashObject
+      class InputHash < Hash
         #to provide autovification and use of symbol indexes
+        def initialize(hash=nil)
+          super()
+          return unless hash
+          replace_el = hash.inject(Hash.new) do |h,(k,v)|
+            processed_v = (v.kind_of?(Hash) ? self.class.new(v) : v)
+            h.merge(k =>  processed_v)
+          end
+          replace(replace_el)
+        end
+
         def [](index)
-          val = super(index.to_s)||{}
+          val = super(internal_key_form(index)) || {}
           (val.kind_of?(Hash) ? self.class.new(val) : val)
+        end
+        def only_has_keys?(*only_has_keys)
+          (keys() - only_has_keys.map{|k|internal_key_form(k)}).empty?
+        end
+       private
+        def internal_key_form(key)
+          key.to_s
         end
       end
 
@@ -72,13 +85,13 @@ module DtkCommon
           end
 
           #load base if no versions loaded already
+          base_path = "#{BaseDirForFileTypes}/#{file_type}"
           if (@loaded_types[file_type]||{}).empty?
-            base_path = "file_parser/#{file_type}"
             require File.expand_path(base_path,File.dirname(__FILE__))
           end
 
           version ||= default_version(file_type)
-          path = "file_parser/#{file_type}/v#{version.to_s}/#{file_type}"
+          path = "#{base_path}/v#{version.to_s}/#{file_type}"
           require File.expand_path(path, File.dirname(__FILE__))
 
           base_class = FileParser.const_get(Aux.snake_to_camel_case(file_type.to_s))
@@ -88,6 +101,7 @@ module DtkCommon
           (@loaded_types[file_type] ||= Hash.new)[version] = ret
           ret
         end
+        BaseDirForFileTypes = "file_parser/file_types"
        private
         def initialize()
           @loaded_types = Hash.new

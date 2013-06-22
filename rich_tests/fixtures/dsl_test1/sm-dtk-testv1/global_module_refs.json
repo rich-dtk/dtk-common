@@ -1,2 +1,14 @@
 {
+  "component_modules": {
+    "dtk_postgresql": {
+      "version" : "0.1.0",
+      "remote_namespace": "r8"
+    }, 
+    "common_user": {
+      "remote_namespace": "r8"
+    },
+    "dtk_server": {
+      "version" : "0.1.0"
+    }
+  }
 }
