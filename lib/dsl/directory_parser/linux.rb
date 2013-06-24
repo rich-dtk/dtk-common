@@ -8,7 +8,7 @@ module DtkCommon; module DSL
      private
       def all_files_from_root()
         Dir.chdir(@directory_root) do
-          Dir["*/**"]
+          Dir["**/*"]
         end
       end
 

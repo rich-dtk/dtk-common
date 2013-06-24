@@ -14,11 +14,11 @@ module DtkCommon
       def parse_directory(file_type=nil)
         pruned_file_info = 
           if file_type
-            if match = @file_info.find{|r|r[:file_type] == file_type}
-              pruned_file_info << match
-            else
+            matches = @file_info.select{|r|r[:file_type] == file_type}
+            if matches.empty?
               raise Error.new("Illegal file type (#{file_type}) for directory_type (#{directory_type})")
             end
+            matches
           else
             @file_info
           end
@@ -42,7 +42,7 @@ module DtkCommon
           else
             rel_path_pattern = r[:rel_path_pattern]
             
-            (all_files_from_root || all_files_from_root()).each do |f|
+            (all_files_from_root ||= all_files_from_root()).each do |f|
               if f =~ rel_path_pattern
                 file_key = $1
                 ret << {:rel_path => f, :file_type => r[:file_type], :key => file_key}
