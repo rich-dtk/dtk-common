@@ -1,0 +1,20 @@
+{
+  "node_bindings": {
+    "dtk-t4/test1": "natty-micro"
+  },
+  "assemblies": {
+    "dtk-t4": {
+      "name": "t4",
+      "nodes": {
+        "test1": {
+          "components": [
+            "stdlib"
+          ]
+        }
+      },
+      "port_links": [
+
+      ]
+    }
+  }
+}

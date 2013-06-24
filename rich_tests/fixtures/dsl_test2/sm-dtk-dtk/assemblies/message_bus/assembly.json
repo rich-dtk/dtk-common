@@ -1,0 +1,23 @@
+{
+  "node_bindings": {
+    "dtk-message_bus/node": "natty-micro"
+  },
+  "assemblies": {
+    "dtk-message_bus": {
+      "name": "message_bus",
+      "nodes": {
+        "node": {
+          "components": [
+            "dtk",
+            "dtk_java",
+            "stdlib",
+            "dtk_activemq"
+          ]
+        }
+      },
+      "port_links": [
+
+      ]
+    }
+  }
+}

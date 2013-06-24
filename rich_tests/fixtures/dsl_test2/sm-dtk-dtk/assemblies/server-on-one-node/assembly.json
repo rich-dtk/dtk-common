@@ -1,0 +1,47 @@
+{
+  "node_bindings": {
+    "dtk-server-on-one-node/tenant": "natty-small"
+  },
+  "assemblies": {
+    "dtk-server-on-one-node": {
+      "name": "server-on-one-node",
+      "nodes": {
+        "tenant": {
+          "components": [
+            "dtk",
+            {
+              "dtk_server::tenant": {
+                "name": "dtk"
+              }
+            },
+            "dtk_java",
+            "dtk_postgresql::server",
+            {
+              "dtk_postgresql::db": {
+                "name": "dtk"
+              }
+            },
+            "gitolite",
+            {
+              "thin": {
+                "app_dir": "/home/dtk/server/application",
+                "daemon_user": "dtk"
+              }
+            },
+            {
+              "gitolite::admin_client": {
+                "name": "dtk"
+              }
+            },
+            "stdlib",
+            "dtk_activemq",
+            "dtk_server::base"
+          ]
+        }
+      },
+      "port_links": [
+
+      ]
+    }
+  }
+}

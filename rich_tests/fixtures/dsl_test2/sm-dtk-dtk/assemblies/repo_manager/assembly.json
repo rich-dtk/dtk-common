@@ -1,0 +1,26 @@
+{
+  "name": "repo_manager",
+  "node_bindings": {
+    "repo_manager": "natty-micro"
+  },
+  "assembly": {
+    "nodes": {
+      "repo_manager": {
+        "components": [
+          "stdlib",
+	  "dtk",
+          {"common_user": {"attributes": {"name": "git"}}},
+          {"gitolite" : {"attributes": {"name" : "git"}}},
+	  "dtk_repo_manager",
+          "dtk_postgresql::server",
+	  {"thin": {
+            "attributes": {
+	      "app_dir": "/home/git/repo_manager",
+              "daemon_user": "git"
+            }
+          }}
+        ]
+      }
+    }
+  }
+}
