@@ -3,17 +3,20 @@ module DtkCommon; module DSL
     class Git < self
       def initialize(repo_path,directory_type,branch='master')
         super(directory_type)
+        puts repo_path
         @repo_path = repo_path
         @branch = branch
       end
      private
       def all_files_from_root()
-        raise Error.new("not written yet")
+        # TODO: Watch version here
+        output = `git --git-dir=#{@repo_path} ls-tree --full-tree -r HEAD`
+        puts output
       end
       def get_content(file_path)
-        #TODO: use method from common grit adapter (may have to write if not there already that reads git object db to get
-        #content on branch
-        raise Error.new("not written yet")
+        output = `git --git-dir=#{@repo_path} show  HEAD:#{file_path}`
+        output = '{}' if output.empty?
+        output
       end
     end
   end
