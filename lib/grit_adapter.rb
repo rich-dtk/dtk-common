@@ -33,7 +33,8 @@ module DTK
           if opts[:delete_if_exists]
             FileUtils.rm_rf target_repo_dir
           else
-            raise Error.new("trying to create a repo directory (#{target_repo_dir}) that exists already")
+            # raise Error.new("trying to create a repo directory (#{target_repo_dir}) that exists already")
+            raise DTK::Client::DtkError, "trying to create a repo directory (#{target_repo_dir}) that exists already"
           end
         end
         clone_cmd_opts = {:raise => true, :timeout => 60}
