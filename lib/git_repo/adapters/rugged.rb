@@ -1,5 +1,6 @@
-require 'rugged'
 module DtkCommon
+  gem 'rugged', GitRepo::NailedRuggedVersion
+  require 'rugged'
   class GitRepo ; class Adapter
     class Rugged < self                    
       def initialize(repo_path)
