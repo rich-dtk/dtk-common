@@ -7,7 +7,7 @@ module DtkCommon
         @repo = ::Rugged::Repository.new(repo_path)
       end
       def get_file_content(path,branch='master')
-        pp [:get_file_content,path,branch]
+        pp :foo
       end
     end
   end; end
