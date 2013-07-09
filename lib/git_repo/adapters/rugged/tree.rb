@@ -12,6 +12,14 @@ module DtkCommon
         end
       end
 
+      def list_files()
+        ret = Array.new
+        @rugged_tree.walk_blobs do |root,entry|
+          ret << "#{root}#{entry[:name]}"
+        end
+        ret
+      end
+
      private
       def get_blob(path)
         ret = nil

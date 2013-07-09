@@ -77,7 +77,8 @@ module DtkCommon
 
     #for each hash value form is scalar or array of adapters to try in order
     AdaptersForMethods = {
-      :get_file_content => :rugged
+      :get_file_content => :rugged,
+      :list_files => :rugged
     }
 
     NailedRuggedVersion = '0.17.0.b7'

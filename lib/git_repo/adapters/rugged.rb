@@ -17,16 +17,23 @@ module DtkCommon
       end
 
       def get_file_content(path)
-        unless commit = get_commit()
-          raise ErrorUsage.new("Branch (#{branch} not found in repo (#{pp_repo()})")
-        end
-        commit.tree.get_file_content(path)
+        get_tree().get_file_content(path)
+      end
+
+      def list_files()
+         get_tree().list_files()
       end
       
      private
+      def get_tree()
+        get_commit().tree()
+      end
+
       def get_commit()
         if rugged_ref = rugged_repo().refs.find {|ref|ref.name == "refs/heads/#{branch}"}
           Commit.new(@repo_branch,lookup(rugged_ref.target))
+        else
+          raise ErrorUsage.new("Branch (#{branch} not found in repo (#{pp_repo()})")
         end
       end 
       
