@@ -12,19 +12,23 @@ module DtkCommon
     end
 
    private
-    def method_missing(name,*args,&block)
-     if adapter_name = get_adapter_name(name)
+    def method_missing(method_name,*args,&block)
+     if adapter_name = self.class.find_adapter_name(method_name)
         execution_wrapper do
-          adapter_instance = @adapters[adapter_name] ||= get_adapter_class(adapter_name).new(@repo_path)
-          adapter_instance.send(name,*args,&block)
+          adapter_instance = @adapters[adapter_name] ||= self.class.load_and_return_adapter_class(adapter_name).new(@repo_path)
+          adapter_instance.send(method_name,*args,&block)
         end
       else
         super
       end
     end
 
-    def respond_to?(name)
-      super(name) or AdaptersForMethods.has_key(name)
+    def respond_to?(method_name)
+      super(method_name) or self.class.find_adapter_name(method_name)
+    end
+
+    def self.implements_method?(method_name)
+      !!find_adapter_name(method_name)
     end
 
     def execution_wrapper(&block)
@@ -37,16 +41,18 @@ module DtkCommon
       end
     end
     
-    def get_adapter_class(adapter_name)
-      DynmamicLoader.load_and_return_adapter_class(:git_repo,adapter_name,:base_class => Adapter)
+    def self.load_and_return_adapter_class(adapter_name)
+      (@adapter_classes ||= Hash.new)[adapter_name] ||= DynmamicLoader.load_and_return_adapter_class(:git_repo,adapter_name,:base_class => Adapter)
     end
 
-    def get_adapter_name(method_name)
+    def self.find_adapter_name(method_name)
+      @adapter_names ||= Hash.new
+      return @adapter_names[method_name] if @adapter_names.has_key?(method_name)
       ret = Array(AdaptersForMethods[method_name]||[]).find do |adapter_name|
         condition = AdapterConditions[adapter_name]
         condition.nil? or condition.call()
       end
-      ret || raise(Error.new("Cannot find applicable adapter for method (#{method_name})"))
+      @adapter_names[method_name] = ret 
     end
 
     #for each hash value form is scalar or array of adapters to try in order
