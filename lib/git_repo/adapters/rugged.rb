@@ -4,6 +4,7 @@ module DtkCommon
   class GitRepo; class Adapter
     class Rugged < self                    
       require File.expand_path('rugged/commit',File.dirname(__FILE__))
+      require File.expand_path('rugged/tree',File.dirname(__FILE__))
 
       def initialize(repo_path)
         @repo = ::Rugged::Repository.new(repo_path)
@@ -12,7 +13,7 @@ module DtkCommon
         unless commit = get_commit(branch)
           raise ErrorUsage.new("Branch (#{branch} not found in repo (#{pp_repo()})")
         end
-        pp commit
+        commit.tree.get_file_content(path)
       end
 
      private
