@@ -11,11 +11,22 @@ module DtkCommon
       @adapters = Hash.new
     end
 
+    class Branch < self
+      def initialize(repo_path,branch='master')
+        super(repo_path)
+        @branch = branch
+      end
+      private
+       def adapter_initialize_args()
+         [@repo_path,@branch]
+       end
+    end
+
    private
     def method_missing(method_name,*args,&block)
      if adapter_name = self.class.find_adapter_name(method_name)
         execution_wrapper do
-          adapter_instance = @adapters[adapter_name] ||= self.class.load_and_return_adapter_class(adapter_name).new(@repo_path)
+          adapter_instance = @adapters[adapter_name] ||= self.class.load_and_return_adapter_class(adapter_name).new(adapter_initialize_args())
           adapter_instance.send(method_name,*args,&block)
         end
       else
@@ -29,6 +40,10 @@ module DtkCommon
 
     def self.implements_method?(method_name)
       !!find_adapter_name(method_name)
+    end
+
+    def adapter_initialize_args()
+      [@repo_path]
     end
 
     def execution_wrapper(&block)

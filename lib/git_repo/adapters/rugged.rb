@@ -9,26 +9,30 @@ module DtkCommon
       require File.expand_path('rugged/blob',File.dirname(__FILE__))
       include CommonMixin
 
-      def initialize(repo_path)
-        @rugged_repo = ::Rugged::Repository.new(repo_path)
+      def initialize(repo_path,branch=nil)
+        if branch.nil?
+          raise Error.new("Not implemented yet creating Rugged adapter w/o a branch")
+        end
+        @repo_branch = Branch.new(::Rugged::Repository.new(repo_path),branch)
       end
-      def get_file_content(path,branch='master')
-        unless commit = get_commit(branch)
+
+      def get_file_content(path)
+        unless commit = get_commit()
           raise ErrorUsage.new("Branch (#{branch} not found in repo (#{pp_repo()})")
         end
         commit.tree.get_file_content(path)
       end
-
+      
      private
-       def get_commit(branch)
-         if rugged_ref = @rugged_repo.refs.find {|ref|ref.name == "refs/heads/#{branch}"}
-           Commit.new(@rugged_repo,lookup(rugged_ref.target))
-         end
-       end 
-
-       def pp_repo()
-         @rugged_repo.path()
-       end
+      def get_commit()
+        if rugged_ref = rugged_repo().refs.find {|ref|ref.name == "refs/heads/#{branch}"}
+          Commit.new(@repo_branch,lookup(rugged_ref.target))
+        end
+      end 
+      
+      def pp_repo()
+        rugged_repo().path()
+      end
     end
   end; end
 end
