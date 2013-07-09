@@ -22,7 +22,6 @@ module DtkCommon
        end
     end
 
-   private
     def method_missing(method_name,*args,&block)
       if adapter_name = self.class.find_adapter_name(method_name)
         
@@ -43,6 +42,7 @@ module DtkCommon
       !!find_adapter_name(method_name)
     end
 
+   private
     def adapter_initialize_args()
       [@repo_path]
     end
