@@ -1,8 +1,8 @@
 module DtkCommon
   class GitRepo::Adapter::Rugged
     class Blob < Obj
-      def initialize(rugged_repo,rugged_blob)
-        super(rugged_repo)
+      def initialize(repo_branch,rugged_blob)
+        super(repo_branch)
         @rugged_blob = rugged_blob
       end
       

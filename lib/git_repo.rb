@@ -24,10 +24,11 @@ module DtkCommon
 
    private
     def method_missing(method_name,*args,&block)
-     if adapter_name = self.class.find_adapter_name(method_name)
+      if adapter_name = self.class.find_adapter_name(method_name)
+        
+        adapter = (@adapters[adapter_name] ||= Hash.new)[branch_index()] ||= self.class.load_and_return_adapter_class(adapter_name).new(*adapter_initialize_args())
         execution_wrapper do
-          adapter_instance = @adapters[adapter_name] ||= self.class.load_and_return_adapter_class(adapter_name).new(adapter_initialize_args())
-          adapter_instance.send(method_name,*args,&block)
+          adapter.send(method_name,*args,&block)
         end
       else
         super
@@ -46,6 +47,10 @@ module DtkCommon
       [@repo_path]
     end
 
+    def branch_index()
+      @branch||"---NONE"
+    end
+
     def execution_wrapper(&block)
       begin
         yield
@@ -55,7 +60,7 @@ module DtkCommon
         raise error
       end
     end
-    
+
     def self.load_and_return_adapter_class(adapter_name)
       (@adapter_classes ||= Hash.new)[adapter_name] ||= DynmamicLoader.load_and_return_adapter_class(:git_repo,adapter_name,:base_class => Adapter)
     end

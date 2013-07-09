@@ -1,8 +1,8 @@
 module DtkCommon
   class GitRepo::Adapter::Rugged
     class Tree < Obj
-      def initialize(rugged_repo,rugged_tree)
-        super(rugged_repo)
+      def initialize(repo_branch,rugged_tree)
+        super(repo_branch)
         @rugged_tree = rugged_tree
       end
 
@@ -21,7 +21,7 @@ module DtkCommon
         end
         @rugged_tree.walk_blobs do |root,entry|
           if root == dir and entry[:name] == file_part
-            return Blob.new(@rugged_repo,entry)
+            return Blob.new(@repo_branch,entry)
           end
         end
         ret
