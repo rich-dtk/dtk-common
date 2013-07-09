@@ -3,11 +3,14 @@ module DtkCommon
   require 'rugged'
   class GitRepo; class Adapter
     class Rugged < self                    
+      require File.expand_path('rugged/common',File.dirname(__FILE__))
       require File.expand_path('rugged/commit',File.dirname(__FILE__))
       require File.expand_path('rugged/tree',File.dirname(__FILE__))
+      require File.expand_path('rugged/blob',File.dirname(__FILE__))
+      include CommonMixin
 
       def initialize(repo_path)
-        @repo = ::Rugged::Repository.new(repo_path)
+        @rugged_repo = ::Rugged::Repository.new(repo_path)
       end
       def get_file_content(path,branch='master')
         unless commit = get_commit(branch)
@@ -18,13 +21,13 @@ module DtkCommon
 
      private
        def get_commit(branch)
-         if rugged_ref = @repo.refs.find {|ref|ref.name == "refs/heads/#{branch}"}
-           Commit.new(@repo.lookup(rugged_ref.target))
+         if rugged_ref = @rugged_repo.refs.find {|ref|ref.name == "refs/heads/#{branch}"}
+           Commit.new(@rugged_repo,lookup(rugged_ref.target))
          end
        end 
 
        def pp_repo()
-         @repo.path()
+         @rugged_repo.path()
        end
     end
   end; end
