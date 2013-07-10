@@ -7,6 +7,10 @@ module DtkCommon
         @input_hash_class = input_hash_class
       end
 
+      def self.implements_method?(method_name)
+        [:parse_content,:generate_hash].include?(method_name)
+      end
+
       def self.parse_content(file_type,file_content,opts={})
         file_parser = Loader.file_parser(file_type,opts[:version])
         raw_hash_content = convert_json_content_to_hash(file_content)
@@ -15,6 +19,11 @@ module DtkCommon
 
       def parse_hash_content_aux(raw_hash)
         parse_hash_content(input_form(raw_hash))
+      end
+
+      def self.generate_hash(file_type,output_array,opts={})
+        file_parser = Loader.file_parser(file_type,opts[:version])
+        file_parser.generate_hash(output_array)
       end
 
       class OutputArray < Array

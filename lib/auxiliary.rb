@@ -13,9 +13,16 @@ module DTK
          end
       end
 
-      def hash_subset(hash,keys_subset)
+      def hash_subset(hash,keys_subset,opts={})
         keys_subset.inject(Hash.new) do |h,k|
-          hash.has_key?(k) ? h.merge(k => hash[k]) : h
+          index = k.kind_of?(Hash) ? k.keys.first : k
+          if opts[:no_non_nil] and hash[index].nil? then h
+          elsif not hash.has_key?(index) then h
+          else
+            key = k.kind_of?(Hash) ? k.values.first : k
+            val = hash[index]
+            h.merge(key => val)
+          end
         end
       end
 

@@ -28,6 +28,17 @@ module DtkCommon; module DSL; class FileParser
         ret
       end
 
+      def generate_hash(output_array)
+        component_modules = output_array.inject(Hash.new) do |h,r|
+          unless cmp_module = r[:component_module]
+            raise Error.new("Missing field (:component_module)")
+          end
+          h.merge(cmp_module => Aux.hash_subset(r,OutputArrayToParseHashCols,:no_non_nil => true))
+        end
+        {:component_modules => component_modules} 
+      end
+      OutputArrayToParseHashCols = [{:version_info => :version},:remote_namespace]
+
     end
   end
 end; end; end
