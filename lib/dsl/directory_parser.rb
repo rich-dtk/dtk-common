@@ -11,6 +11,13 @@ module DtkCommon
         @directory_type = directory_type
       end
 
+      DirectoryParserMethods = [:parse_directory]
+      def self.implements_method?(method_name)
+        DirectoryParserMethods.include?(method_name)
+      end
+
+      #if file_type is given returns DtkCommon::DSL::FileParser::OutputArray
+      #otherwise returns hash at top level taht is indexed by file types found
       def parse_directory(file_type=nil)
         pruned_file_info = 
           if file_type
@@ -24,11 +31,13 @@ module DtkCommon
           end
         #instantiate any rel_path_pattern
         pruned_file_instances  = instantiate_rel_path_patterns(pruned_file_info)
-        pruned_file_instances.each do |r|
+        ret = pruned_file_instances.inject(Hash.new) do |h,r|
           file_content = get_content(r[:rel_path])
-          pp FileParser.parse_content(r[:file_type],file_content)
+          h.merge(r[:file_type] => FileParser.parse_content(r[:file_type],file_content))
         end
+        file_type.nil? ? ret : ret[file_type]
       end
+
      private
       def file_info(directory_type)
         DirectoryTypeFiles[directory_type]

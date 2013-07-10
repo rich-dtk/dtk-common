@@ -18,8 +18,8 @@ Dir.chdir(File.dirname(__FILE__)) do
     
     pp dir_parser.all_files_from_root()
     puts "----\n"
-    puts "Parse service_module"
-    dir_parser.parse_directory(:component_module_refs)
+    puts "Parse service_module component_module_refs"
+    pp dir_parser.parse_directory(:component_module_refs)
   end
 end
 

@@ -9,6 +9,18 @@ module DtkCommon; module DSL
         @repo_path = repo_path
         @repo_branch = GitRepo::Branch.new(repo_path,branch)
       end
+
+      def self.implements_method?(method_name)
+        if DirectoryParserMethods.include?(method_name)
+          case method_name
+           when :parse_directory
+            GitRepo::Branch.implements_method?(:get_file_content)
+           else
+            true
+          end
+        end
+      end
+
      private
       def all_files_from_root()
         # TODO: Watch version here
