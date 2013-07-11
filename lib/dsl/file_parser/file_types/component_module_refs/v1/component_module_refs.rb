@@ -11,9 +11,9 @@ module DtkCommon; module DSL; class FileParser
         component_modules.each do |component_module,v|
           new_el = OutputHash.new(:component_module => component_module)
           parse_error = true
-          if v.kind_of?(InputHash) and v.only_has_keys?(:version,:remote_namespace) and not v.empty?()
+          if v.kind_of?(InputHash) and v.only_has_keys?(:version,:remote_namespace,:namespace) and not v.empty?()
             parse_error = false
-            new_el.merge_non_empty!(:version_info => v[:version], :remote_namespace => v[:remote_namespace])
+            new_el.merge_non_empty!(:version_info => v[:version], :remote_namespace => v[:remote_namespace]||v[:namespace])
           elsif v.kind_of?(String)
             parse_error = false
             new_el.merge_non_empty!(:version_info => v)
