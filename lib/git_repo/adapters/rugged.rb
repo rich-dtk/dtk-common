@@ -1,3 +1,5 @@
+require File.expand_path('../../git_repo.rb',File.dirname(__FILE__))
+
 module DtkCommon
   gem 'rugged', GitRepo::NailedRuggedVersion
   require 'rugged'

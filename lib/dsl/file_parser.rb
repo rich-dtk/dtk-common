@@ -1,7 +1,56 @@
 require 'singleton'
 require 'json'
+require File.expand_path('../hash_object',File.dirname(__FILE__))
+
 module DtkCommon
   module DSL             
+    class Loader
+      include Singleton
+      def self.file_parser(file_type,version=nil)
+        instance.file_parser(file_type,version)
+      end
+
+      def file_parser(file_type,version=nil)
+        ret = (@loaded_types[file_type]||{})[version]
+        return ret if ret
+        unless FileTypes.include?(file_type)
+          raise Error.new("Illegal file type (#{file_type})")
+        end
+
+        #load base if no versions loaded already
+        base_path = "#{BaseDirForFileTypes}/#{file_type}"
+        if (@loaded_types[file_type]||{}).empty?
+          require File.expand_path(base_path,File.dirname(__FILE__))
+        end
+
+        version ||= default_version(file_type)
+        path = "#{base_path}/v#{version.to_s}/#{file_type}"
+        require File.expand_path(path, File.dirname(__FILE__))
+
+        base_class = FileParser.const_get(Aux.snake_to_camel_case(file_type.to_s))
+        ret_class = base_class.const_get("V#{version.to_s}")
+        input_hash_class = ret_class.const_get "InputHash"
+        ret = ret_class.new(input_hash_class)
+        (@loaded_types[file_type] ||= Hash.new)[version] = ret
+        ret
+      end
+      BaseDirForFileTypes = "file_parser/file_types"
+     private
+      def initialize()
+        @loaded_types = Hash.new
+      end
+
+      def default_version(file_type)
+        FileTypeVesisonDefaults[file_type] || 1
+      end
+      FileTypes = 
+        [
+         :component_module_refs
+        ]
+      FileTypeVesisonDefaults = {
+        :component_module_refs => 1
+      }
+    end
     class FileParser
       def initialize(input_hash_class)
         @input_hash_class = input_hash_class
@@ -35,7 +84,7 @@ module DtkCommon
           super
         end
       end
-      class OutputHash < SimpleHashObject
+      class OutputHash < ::DTK::Common::SimpleHashObject
         def merge_non_empty!(hash)
           hash.each{|k,v| merge!(k => v) unless v.nil? or v.empty?}
           self
@@ -80,53 +129,6 @@ module DtkCommon
         end
       end
 
-      class Loader
-        include Singleton
-        def self.file_parser(file_type,version=nil)
-          instance.file_parser(file_type,version)
-        end
-
-        def file_parser(file_type,version=nil)
-          ret = (@loaded_types[file_type]||{})[version]
-          return ret if ret
-          unless FileTypes.include?(file_type)
-            raise Error.new("Illegal file type (#{file_type})")
-          end
-
-          #load base if no versions loaded already
-          base_path = "#{BaseDirForFileTypes}/#{file_type}"
-          if (@loaded_types[file_type]||{}).empty?
-            require File.expand_path(base_path,File.dirname(__FILE__))
-          end
-
-          version ||= default_version(file_type)
-          path = "#{base_path}/v#{version.to_s}/#{file_type}"
-          require File.expand_path(path, File.dirname(__FILE__))
-
-          base_class = FileParser.const_get(Aux.snake_to_camel_case(file_type.to_s))
-          ret_class = base_class.const_get("V#{version.to_s}")
-          input_hash_class = ret_class.const_get "InputHash"
-          ret = ret_class.new(input_hash_class)
-          (@loaded_types[file_type] ||= Hash.new)[version] = ret
-          ret
-        end
-        BaseDirForFileTypes = "file_parser/file_types"
-       private
-        def initialize()
-          @loaded_types = Hash.new
-        end
-
-        def default_version(file_type)
-          FileTypeVesisonDefaults[file_type] || 1
-        end
-        FileTypes = 
-          [
-           :component_module_refs
-          ]
-        FileTypeVesisonDefaults = {
-          :component_module_refs => 1
-        }
-      end
     end
 
     class ErrorUsage
