@@ -1,5 +1,6 @@
 require File.expand_path('../../git_repo.rb',File.dirname(__FILE__))
 require 'bundler'
+require 'rugged'
 module DtkCommon
   class GitRepo; class Adapter
     class Rugged

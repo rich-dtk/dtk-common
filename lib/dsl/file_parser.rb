@@ -19,9 +19,9 @@ module DtkCommon
 
         #load base if no versions loaded already
         base_path = "#{BaseDirForFileTypes}/#{file_type}"
-        if (@loaded_types[file_type]||{}).empty?
-          require File.expand_path(base_path,File.dirname(__FILE__))
-        end
+        #if (@loaded_types[file_type]||{}).empty?
+        #   require File.expand_path(base_path,File.dirname(__FILE__))
+        #end
 
         version ||= default_version(file_type)
         path = "#{base_path}/v#{version.to_s}/#{file_type}"

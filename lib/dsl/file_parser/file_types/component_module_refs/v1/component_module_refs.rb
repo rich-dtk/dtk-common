@@ -1,5 +1,5 @@
 module DtkCommon; module DSL; class FileParser
-  class ComponentModuleRefs
+  class ComponentModuleRefs < self
     class V1 < self
       def parse_hash_content(input_hash)
         ret = OutputArray.new
