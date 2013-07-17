@@ -1,4 +1,6 @@
 require File.expand_path('common_patch',File.dirname(__FILE__))
+require 'thread'
+
 module DtkCommon
   class DynmamicLoader
     def self.load_and_return_adapter_class(adapter_type,adapter_name,opts={})
