@@ -11,8 +11,7 @@ module DtkCommon
         super(msg,name)
       end
     end
-    class ErrorUsage < Error
-    end
+
     Log = ::DTK::Log
     SimpleHashObject = ::DTK::Common::SimpleHashObject
     module Aux
