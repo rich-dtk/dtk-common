@@ -81,7 +81,7 @@ module DtkCommon
       :list_files => :rugged
     }
 
-    NailedRuggedVersion = '0.17.0.b7'
+    NailedRuggedVersion = '0.19.0'
 
     AdapterConditions = {
       :rugged => proc{!::Gem::Specification::find_all_by_name('rugged',::Gem::Requirement.new(NailedRuggedVersion)).empty?}
