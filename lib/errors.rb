@@ -1,2 +1,2 @@
-dtk_nested_require('errors','errors')
-dtk_nested_require('errors','rest_error')
+require File.expand_path('errors/errors', File.dirname(__FILE__))
+require File.expand_path('errors/rest_error', File.dirname(__FILE__))

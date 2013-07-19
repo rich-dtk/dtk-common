@@ -61,6 +61,8 @@ module DtkCommon
       end
 
       def self.parse_content(file_type,file_content,opts={})
+        # if there is no content (nil) return emtpy array as if content was empty
+        return [] unless file_content
         file_parser = Loader.file_parser(file_type,opts[:version])
         raw_hash_content = convert_json_content_to_hash(file_content)
         file_parser.parse_hash_content_aux(raw_hash_content)
@@ -122,6 +124,7 @@ module DtkCommon
       end
 
       def self.convert_json_content_to_hash(json_file_content)
+
         ret = Hash.new
         if json_file_content.empty?
           return ret
