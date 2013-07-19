@@ -122,6 +122,11 @@ module DtkCommon
       end
 
       def self.convert_json_content_to_hash(json_file_content)
+        ret = Hash.new
+        if json_file_content.empty?
+          return ret
+        end
+
         begin 
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
@@ -136,7 +141,7 @@ module DtkCommon
       class JSONParse < self
       end
       #when error is dtk content
-      class DTKParse < ErrorUsage
+      class DTKParse < self
       end
     end
   end
