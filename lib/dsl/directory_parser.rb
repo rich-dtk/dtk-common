@@ -61,12 +61,12 @@ module DtkCommon
         end
         ret
       end
-      #TODO: may [put version info here too
+      #TODO: may put version info here too
       DirectoryTypeFiles = {
         :service_module => 
         [
          {:rel_path => "global_module_refs.json", :file_type => :component_module_refs},
-         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.json$/, :file_type => :assembly_dsl}
+         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.json$/, :file_type => :assembly}
         ]
       }
     end

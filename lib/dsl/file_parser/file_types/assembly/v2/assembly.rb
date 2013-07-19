@@ -26,8 +26,9 @@ module DtkCommon; module DSL; class FileParser
 
         def self.parse_hash_content(input_hash)
           ret = OutputArray.new
-          input_hash.each_pair do |node_name,node_info|
-            (node_info[:components]||{}).each_key do |mod_component_name|
+          (input_hash[:nodes]||{}).each_pair do |node_name,node_info|
+            (node_info[:components]||{}).each do |component|
+              mod_component_name = (component.kind_of?(Hash) ? component.keys.first : component)
               module_name,component_name = ret_module_and_component_names(mod_component_name)
               ret << OutputHash.new(:component_name => component_name,:module_name => module_name,:node_name => node_name)
             end
