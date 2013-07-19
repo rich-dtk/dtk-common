@@ -88,6 +88,18 @@ module DtkCommon
           super
         end
 
+        def +(output_obj)
+          if output_obj.kind_of?(OutputArray)
+            super
+          elsif output_obj.kind_of?(OutputHash)
+            super(OutputArray.new(OutputHash))
+          elsif output_obj.nil?
+            self
+          else
+            raise Error.new("Unexpected object type (#{output_obj.class})")
+          end
+        end
+
         #can be overwritten
         def self.has_required_keys?(hash_el)
           (keys_for_row() - hash_el.keys?).nil?
@@ -98,6 +110,18 @@ module DtkCommon
         def merge_non_empty!(hash)
           hash.each{|k,v| merge!(k => v) unless v.nil? or v.empty?}
           self
+        end
+
+        def +(output_obj)
+          if output_obj.kind_of?(OutputArray)
+            OutputArray.new(self) + output_obj
+          elsif output_obj.kind_of?(OutputHash)
+            merge(output_obj)
+          elsif output_obj.nil?
+            self
+          else
+            raise Error.new("Unexpected object type (#{output_obj.class})")
+          end
         end
       end
 

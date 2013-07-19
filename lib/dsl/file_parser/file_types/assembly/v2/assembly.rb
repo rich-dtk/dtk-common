@@ -36,11 +36,13 @@ module DtkCommon; module DSL; class FileParser
           ret
         end
        private
+
+        #returns [module_name,component_name]
         def self.ret_module_and_component_names(mod_component_name)
           if mod_component_name =~ /(^[^:]+)::([^:]+$)/
             [$1,$2]
           else
-             mod_component_name
+            [mod_component_name,mod_component_name]
           end
         end
       end
