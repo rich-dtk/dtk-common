@@ -45,10 +45,12 @@ module DtkCommon
       end
       FileTypes = 
         [
-         :component_module_refs
+         :component_module_refs,
+         :assembly
         ]
       FileTypeVesisonDefaults = {
-        :component_module_refs => 1
+        :component_module_refs => 1,
+        :assembly => 2
       }
     end
     class FileParser
@@ -85,6 +87,12 @@ module DtkCommon
           end
           super
         end
+
+        #can be overwritten
+        def self.has_required_keys?(hash_el)
+          (keys_for_row() - hash_el.keys?).nil?
+        end
+
       end
       class OutputHash < ::DTK::Common::SimpleHashObject
         def merge_non_empty!(hash)
