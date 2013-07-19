@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = DtkCommon::VERSION
 
-  gem.add_dependency 'rugged','~> 0.17.0.b7'
+  gem.add_dependency 'rugged','~> 0.19.0'
   # gem.add_dependency 'sequel','~> 3.40.0'
   # gem.add_dependency 'rdoc','~> 3.12'
 end
