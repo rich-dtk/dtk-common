@@ -31,9 +31,11 @@ module DtkCommon
           end
         #instantiate any rel_path_pattern
         pruned_file_instances  = instantiate_rel_path_patterns(pruned_file_info)
-        ret = pruned_file_instances.inject(Hash.new) do |h,r|
+        ret = Hash.new
+        pruned_file_instances.each do |r|
           file_content = get_content(r[:rel_path])
-          h.merge(r[:file_type] => FileParser.parse_content(r[:file_type],file_content))
+          new_parsed = FileParser.parse_content(r[:file_type],file_content)
+          ret[file_type] = (ret[file_type] ? ret[file_type] + new_parsed : new_parsed)
         end
         file_type.nil? ? ret : ret[file_type]
       end
@@ -61,12 +63,12 @@ module DtkCommon
         end
         ret
       end
-      #TODO: may [put version info here too
+      #TODO: may put version info here too
       DirectoryTypeFiles = {
         :service_module => 
         [
          {:rel_path => "global_module_refs.json", :file_type => :component_module_refs},
-         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.json$/, :file_type => :assembly_dsl}
+         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.json$/, :file_type => :assembly}
         ]
       }
     end

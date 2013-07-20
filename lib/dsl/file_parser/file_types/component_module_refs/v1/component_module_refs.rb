@@ -49,7 +49,7 @@ module DtkCommon; module DSL; class FileParser
         [:component_module,:version_info,:remote_namespace]
       end
       def self.has_required_keys?(hash_el)
-        !!(hash_el[:component_module] and (hash_el[:version_info] or hash_el[:remote_namespace]))
+        !hash_el[:component_module].nil?
       end
     end
   end
