@@ -1,4 +1,16 @@
+#TODO: will start moving over to using DtkCommon namespace; versions in DtkCommon namespace also in DTK::Common are teh upgraded versions
 require 'etc'
+
+module DtkCommon
+  module Aux
+    def self.dtk_instance_repo_username(tenant_id=nil)
+      instance_unique_id = get_ec2_instance_id() || get_macaddress().gsub(/:/,'-')
+      tenant_id ||= ::DTK::Common::Aux.running_process_user()
+      "#{instance_unique_id}--#{tenant_id}"
+    end
+  end
+end
+
 module DTK
   module Common
     module AuxMixin
