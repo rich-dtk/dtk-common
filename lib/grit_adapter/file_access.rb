@@ -25,7 +25,9 @@ module DTK; module Common; class GritAdapter
     def remove_file(file_rel_path)
       file_path = qualified_path(file_rel_path)
       chdir_and_checkout do
-        git_command(:rm,file_path)
+        if File.exists?(file_path)
+          git_command(:rm,file_path)
+        end
       end
     end
 
@@ -260,10 +262,11 @@ module DTK; module Common; class GritAdapter
     end
 
     def chdir(&block)
+      unless File.directory?(@repo_dir)
+        raise Error.new("Trying to chdir to directory (#{@repo_dir}) that does not exist")
+      end
       Dir.chdir(@repo_dir){yield}
     end
-
-
 
   end
 end;end;end
