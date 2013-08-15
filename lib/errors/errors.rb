@@ -4,9 +4,19 @@ module DTK
     def self.top_error_in_hash()
       {:error => :Error}
     end
-    def initialize(msg="",name=nil)
+    def initialize(msg="",name_or_opts=nil)
+      name = nil
+      opts = Hash.new
+      if name_or_opts.kind_of?(Hash)
+        opts = name_or_opts
+      else
+        name = name_or_opts
+      end
       super(msg,name)
-      Log.info(to_s)
+      #TODO: might make default to be :log_error => false
+      unless opts.has_key?(:log_error) and not opts[:log_error]
+        Log.info(to_s)
+      end
     end
     def to_hash()
       if to_s == "" 
