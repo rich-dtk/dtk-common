@@ -68,6 +68,9 @@ module DtkCommon
         return ret unless file_content
         file_parser = Loader.file_parser(file_type,opts[:version])
         raw_hash_content = convert_json_content_to_hash(file_content)
+
+        return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::JSONParse)
+
         file_parser.parse_hash_content_aux(raw_hash_content)
       end
 
@@ -166,7 +169,8 @@ module DtkCommon
         begin 
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
-          raise ErrorUsage::JSONParse.new(e.to_s)
+          # raise ErrorUsage::JSONParse.new(e.to_s)
+          return ErrorUsage::JSONParse.new(e.to_s)
         end
       end
 
