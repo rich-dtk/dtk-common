@@ -34,7 +34,8 @@ module DtkCommon
         ret = Hash.new
         pruned_file_instances.each do |r|
           file_content = get_content(r[:rel_path])
-          new_parsed = FileParser.parse_content(r[:file_type],file_content)
+          opts = { :file_path => r[:rel_path]}
+          new_parsed = FileParser.parse_content(r[:file_type],file_content,opts)
           ret[file_type] = (ret[file_type] ? ret[file_type] + new_parsed : new_parsed)
         end
         file_type.nil? ? ret : ret[file_type]

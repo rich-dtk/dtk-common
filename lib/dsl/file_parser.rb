@@ -67,7 +67,7 @@ module DtkCommon
         # if there is no content (nil) return empty array as if content was empty
         return ret unless file_content
         file_parser = Loader.file_parser(file_type,opts[:version])
-        raw_hash_content = convert_json_content_to_hash(file_content)
+        raw_hash_content = convert_json_content_to_hash(file_content,opts[:file_path])
 
         return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::JSONParse)
 
@@ -159,7 +159,7 @@ module DtkCommon
         @input_hash_class.new(raw_hash)
       end
 
-      def self.convert_json_content_to_hash(json_file_content)
+      def self.convert_json_content_to_hash(json_file_content, file_path=nil)
 
         ret = Hash.new
         if json_file_content.empty?
@@ -170,15 +170,23 @@ module DtkCommon
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
           # raise ErrorUsage::JSONParse.new(e.to_s)
-          return ErrorUsage::JSONParse.new(e.to_s)
+          return ErrorUsage::JSONParse.new(e.to_s, file_path)
         end
       end
 
     end
 
-    class ErrorUsage
+    class ErrorUsage < Error
       #when error is content does not have JSON
       class JSONParse < self
+        def initialize(base_json_error,file_path=nil)
+          super(err_msg(base_json_error,file_path))
+        end
+        private
+        def err_msg(base_json_error,file_path=nil)
+          file_ref = file_path && " in file (#{file_path})"
+          "JSON parsing error#{file_ref}: #{base_json_error}"
+        end
       end
       #when error is dtk content
       class DTKParse < self
