@@ -69,7 +69,7 @@ module DtkCommon
         file_parser = Loader.file_parser(file_type,opts[:version])
         raw_hash_content = convert_json_content_to_hash(file_content,opts[:file_path])
 
-        return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::JSONParse)
+        return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
         file_parser.parse_hash_content_aux(raw_hash_content)
       end
@@ -170,7 +170,7 @@ module DtkCommon
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
           # raise ErrorUsage::JSONParse.new(e.to_s)
-          return ErrorUsage::JSONParse.new(e.to_s, file_path)
+          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e.to_s} in file", file_path)
         end
       end
 
@@ -178,16 +178,33 @@ module DtkCommon
 
     class ErrorUsage < Error
       #when error is content does not have JSON
-      class JSONParse < self
+      # class JSONParse < self
+      #   def initialize(base_json_error,file_path=nil)
+      #     super(err_msg(base_json_error,file_path))
+      #   end
+      #   private
+      #   def err_msg(base_json_error,file_path=nil)
+      #     # file_ref = file_path && " in file (#{file_path})"
+      #     # "JSON parsing error#{file_ref}: #{base_json_error}"
+      #     "#{base_json_error}: #{file_path}"
+      #   end
+      # end
+
+      class DSLParsing < self
         def initialize(base_json_error,file_path=nil)
           super(err_msg(base_json_error,file_path))
         end
         private
         def err_msg(base_json_error,file_path=nil)
-          file_ref = file_path && " in file (#{file_path})"
-          "JSON parsing error#{file_ref}: #{base_json_error}"
+          # file_ref = file_path && " in file (#{file_path})"
+          # "JSON parsing error#{file_ref}: #{base_json_error}"
+          "#{base_json_error}: #{file_path}"
+        end
+
+        class JSONParse < self
         end
       end
+
       #when error is dtk content
       class DTKParse < self
       end
