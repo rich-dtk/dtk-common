@@ -136,6 +136,9 @@ module DTK
               block.call 
             rescue ::RestClient::ServerBrokeConnection,::RestClient::Forbidden,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
               error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts)
+            rescue ::RestClient::ResourceNotFound => e
+              errors = {"code" => RestClientErrors[e.class.to_s], "message" => e.to_s}
+              error_response(errors)
             rescue Exception => e
               error_response({ErrorsSubFieldCode => e.class.to_s},opts)
             end
@@ -152,6 +155,7 @@ module DTK
             "RestClient::Request::Unauthorized" => "unauthorized",
             "RestClient::InternalServerError" => "internal_server_error",
             "RestClient::RequestTimeout" => "timeout",
+            "RestClient::ResourceNotFound" => "resource_not_found",
             "Errno::ECONNREFUSED" => "connection_refused"
           }
         end
