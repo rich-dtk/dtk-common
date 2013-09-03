@@ -83,7 +83,7 @@ module DTK
       def internal_key_form(key)
         key.to_s
       end
-      def external_key_form(key)
+      def external_key_form(key) 
         key.to_sym
       end
       private :internal_key_form,:external_key_form
@@ -133,8 +133,13 @@ module DTK
 
           def error_handling(opts={},&block)            
             begin
-              block.call 
-            rescue ::RestClient::ServerBrokeConnection,::RestClient::Forbidden,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
+              block.call
+            rescue ::RestClient::Forbidden => e
+              return error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts) unless e.inspect.to_s.include?("PG::Error")
+
+              errors = {"code" => "pg_error", "message" => e.inspect.to_s.strip}
+              error_response(errors)
+            rescue ::RestClient::ServerBrokeConnection,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
               error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts)
             rescue ::RestClient::ResourceNotFound => e
               errors = {"code" => RestClientErrors[e.class.to_s], "message" => e.to_s}
