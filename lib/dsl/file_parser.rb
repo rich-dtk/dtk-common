@@ -67,7 +67,7 @@ module DtkCommon
         # if there is no content (nil) return empty array as if content was empty
         return ret unless file_content
         file_parser = Loader.file_parser(file_type,opts[:version])
-        raw_hash_content = convert_json_content_to_hash(file_content,opts[:file_path])
+        raw_hash_content = convert_json_content_to_hash(file_content,opts)
 
         return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
@@ -159,8 +159,7 @@ module DtkCommon
         @input_hash_class.new(raw_hash)
       end
 
-      def self.convert_json_content_to_hash(json_file_content, file_path=nil)
-
+      def self.convert_json_content_to_hash(json_file_content, opts={})
         ret = Hash.new
         if json_file_content.empty?
           return ret
@@ -170,7 +169,8 @@ module DtkCommon
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
           # raise ErrorUsage::JSONParse.new(e.to_s)
-          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e.to_s} in file", file_path)
+          return ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e.to_s} in file", opts[:file_path]) if opts[:do_not_raise]
+          raise ErrorUsage::DSLParsing::JSONParsing.new("JSON parsing error #{e.to_s} in file", opts[:file_path])
         end
       end
 

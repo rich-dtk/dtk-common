@@ -18,7 +18,7 @@ module DtkCommon
 
       #if file_type is given returns DtkCommon::DSL::FileParser::OutputArray
       #otherwise returns hash at top level taht is indexed by file types found
-      def parse_directory(file_type=nil)
+      def parse_directory(file_type=nil,opts={})
         pruned_file_info = 
           if file_type
             matches = @file_info.select{|r|r[:file_type] == file_type}
@@ -34,7 +34,7 @@ module DtkCommon
         ret = Hash.new
         pruned_file_instances.each do |r|
           file_content = get_content(r[:rel_path])
-          opts = { :file_path => r[:rel_path]}
+          opts[:file_path] = r[:rel_path]
           new_parsed = FileParser.parse_content(r[:file_type],file_content,opts)
           ret[file_type] = (ret[file_type] ? ret[file_type] + new_parsed : new_parsed)
         end
