@@ -88,7 +88,7 @@ module DTK; module Common; class GritAdapter
       changes = [@grit_repo.status.changed(), @grit_repo.status.untracked(), @grit_repo.status.deleted()]
       puts "\nModified files:\n".colorize(:green) unless changes[0].empty?
       changes[0].each { |item| puts "\t#{item.first}" }
-      puts "\nUntracked files:\n".colorize(:yellow) unless changes[1].empty?
+      puts "\nAdded files:\n".colorize(:yellow) unless changes[1].empty?
       changes[1].each { |item| puts "\t#{item.first}" }
       puts "\nDeleted files:\n".colorize(:red) unless changes[2].empty?
       changes[2].each { |item| puts "\t#{item.first}" }
