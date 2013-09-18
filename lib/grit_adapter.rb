@@ -190,11 +190,19 @@ module DTK
         ret
       end
 
+      def git_command_status()
+        git_command_extra_opts(:status,:chdir => @grit_repo.working_dir)
+      end
+
       def git_command_during_init(grit_repo,cmd,*args)
         grit_repo.git.send(cmd, cmd_opts(),*args)
       end
       def git_command(cmd,*args)
         @grit_repo.git.send(cmd, cmd_opts(),*args)
+      end
+      def git_command_extra_opts(cmd,*args)
+        extra_opts = args.pop
+        @grit_repo.git.send(cmd, cmd_opts().merge(extra_opts),*args)
       end
       def cmd_opts()
         {:raise => true, :timeout => 60}
