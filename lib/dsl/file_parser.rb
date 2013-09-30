@@ -201,7 +201,7 @@ module DtkCommon
           "#{base_json_error}: #{file_path}"
         end
 
-        class JSONParse < self
+        class JSONParsing < self
         end
       end
 
