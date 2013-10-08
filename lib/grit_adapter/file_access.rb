@@ -72,12 +72,29 @@ module DTK; module Common; class GritAdapter
       grit_files = @grit_repo.status.files.select { |k,v| (v.type =~ /(A|M)/ || v.untracked) }
       changed_files = grit_files.select do |file|
         file_name = file.instance_of?(String) ? file : file.first
-        output.include?(file_name)
+        filter_file_through_status_output(file_name,output)
       end
 
       # returns array of arrays (first element name of file)
       changed_files.to_a
     end
+
+    #TODO: see if we can do away with this
+    def filter_file_through_status_output(file_name,output)
+      #need to search for both filename and whether dircetory added
+       if output.include?(file_name)
+         true
+       else
+         file_parts = file_name.split('/')
+         file_parts.pop
+         while not file_parts.empty? do
+           return true if output.include?(file_parts.join('/')+'/')
+           file_parts.pop
+         end
+         false
+       end
+    end
+    private :filter_file_through_status_output
 
     def deleted_files()
       # returns array of arrays (first element name of file)
