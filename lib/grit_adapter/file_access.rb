@@ -11,16 +11,22 @@ module DTK; module Common; class GritAdapter
       file_path = qualified_path(file_rel_path)
       chdir_and_checkout do
         File.open(file_path,"w"){|f|f << content}
-        git_command(:add,file_path)
+        git_command__add(file_path)
       end
     end
 
     def add_file_command(file_rel_path)
       chdir_and_checkout do
         file_path = qualified_path(file_rel_path)
-        git_command(:add,file_path)
+        git_command__add(file_path)
       end
     end
+
+    def git_command__add(file_path)
+      #put in -f to avoid error being thrown if try to add an ignored file
+      git_command(:add,file_path,"-f")
+    end
+    private :git_command__add
 
     def remove_file(file_rel_path)
       file_path = qualified_path(file_rel_path)
