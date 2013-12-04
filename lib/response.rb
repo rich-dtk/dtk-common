@@ -104,14 +104,15 @@ module DTK
       class RestClientWrapper 
         class << self
           include ResponseTokens
-          def get_raw(url,opts={},&block)
+          def get_raw(url,body={},opts={},&block)
             error_handling(opts) do
-              raw_response = ::RestClient::Resource.new(url,opts).get()
+              url_with_params = generate_query_params_url(url, body)
+              raw_response = ::RestClient::Resource.new(url_with_params,opts).get()
               block ? block.call(raw_response) : raw_response
             end
           end
         
-          def get(url,opts={})
+          def get(url, body={}, opts={})
             get_raw(url,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
 
@@ -121,15 +122,37 @@ module DTK
               block ? block.call(raw_response) : raw_response
             end
           end
-        
+          
+          def delete_raw(url,body={},opts={},&block)
+            error_handling(opts) do
+              # DELETE method supports only query params
+              url_with_params = generate_query_params_url(url, body)
+              raw_response = ::RestClient::Resource.new(url_with_params,opts).delete()
+              block ? block.call(raw_response) : raw_response
+            end
+          end
+
           def post(url,body={},opts={})
             post_raw(url,body,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
+          end
+
+          def delete(url, body={}, opts={})
+            delete_raw(url,body,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
 
           def json_parse_if_needed(item)
             item.kind_of?(String) ? JSON.parse(item) : item
           end
          private
+          
+          def generate_query_params_url(url, params_hash)
+            if params_hash.empty?
+              return url
+            else
+              query_params_string = params_hash.map { |k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join('&')
+              return url.concat('?').concat(query_params_string)
+            end
+          end
 
           def error_handling(opts={},&block)            
             begin
