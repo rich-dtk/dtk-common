@@ -113,7 +113,7 @@ module DTK
           end
         
           def get(url, body={}, opts={})
-            get_raw(url,opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
+            get_raw(url,body, opts){|raw_response|Response.new(json_parse_if_needed(raw_response))}
           end
 
           def post_raw(url,body={},opts={},&block)
