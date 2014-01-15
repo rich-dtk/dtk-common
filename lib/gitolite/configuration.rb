@@ -3,7 +3,7 @@ module Gitolite
 
     attr_accessor :repositories_path, :user_groups_path, :keydir_path
 
-    def initializer(
+    def initialize(
         repo_path_        = 'conf/repo-configs', 
         user_groups_path_ = 'conf/user-groups', 
         keydir_path_      = 'keydir'

@@ -1,10 +1,11 @@
+
 module Gitolite
   class Manager
 
     attr_accessor :repos, :user_groups, :configuration, :logger, :commit_messages
     attr_reader :gitolite_path
 
-    def initializer(gitolite_path, override_configuration = nil, )
+    def initialize(gitolite_path, override_configuration = nil)
       @repos, @user_groups, @commit_messages = [], [], []
       @gitolite_path = gitolite_path
       @configuration = override_configuration || Configuration.new
@@ -12,13 +13,13 @@ module Gitolite
     end
 
     def open_repo(repo_name)
-      repo_conf = Repo.new(repo_name, @logger)
+      repo_conf = Repo.new(repo_name, @logger, @gitolite_path)
       @repos << repo_conf
       repo_conf
     end
 
     def open_group(group_name)
-      group_conf = UserGroup.new(group_name, @logger)
+      group_conf = UserGroup.new(group_name, @logger, @gitolite_path)
       @user_groups << group_conf
       group_conf
     end
@@ -27,7 +28,7 @@ module Gitolite
       key_path = @configuration.user_key_path(username)
 
       if users_public_keys().include?(key_path)
-        raise ::Gitolite::Duplicate, "Trying to create a user (#{user_object.git_username}) that exists already on gitolite server"
+        raise ::Gitolite::Duplicate, "Trying to create a user (#{username}) that exists already on gitolite server"
       end
 
       commit_file(key_path,rsa_pub_key, "Added RSA public key for user '#{username}'")
@@ -35,16 +36,30 @@ module Gitolite
       key_path
     end
 
-    def delete_user(username)
+    def remove_user(username)
       key_path = @configuration.user_key_path(username)
+
+      unless users_public_keys().include?(key_path)
+        raise ::Gitolite::NotFound, "User (#{username}) not found on gitolite server"
+      end
+
       remove_file(key_path, "Removing RSA public key for user '#{username}'")
       username
+    end
+
+    def push()
+      changed_repos  = @repos.select { |repo| repo.any_changes? }
+      changed_groups = @user_groups.select { |ug| ug.any_changes? }
+
+      unless (@commit_messages.empty? && changed_repos.empty? && changed_groups.empty?)
+        gitolite_admin_repo().push()
+      end
     end
 
   private
 
     def gitolite_admin_repo()
-      @gitolite_admin ||= FileAccess.new
+      @gitolite_admin ||= Git::FileAccess.new(@gitolite_path)
     end
 
     def list_files_in_path(path)
@@ -58,20 +73,15 @@ module Gitolite
       list_files_in_path(base_path)
     end
 
-    def repo_config_file_paths()
-      base_path = repo_config_relative_path
-      ret_files_under_path(base_path)
-    end
-
     def commit_file(file, content, commit_msg)
-      @gitolite_admin.add_file(file, content)
-      @gitolite_admin.commit(commit_msg)
+      gitolite_admin_repo().add_file(file, content)
+      gitolite_admin_repo().commit(commit_msg)
       @commit_messages << commit_msg
     end
 
     def remove_file(file_path, commit_msg)
-      @gitolite_admin.remove_file(file_path)
-      @gitolite_admin.commit(commit_msg)
+      gitolite_admin_repo().remove_file(file_path)
+      gitolite_admin_repo().commit(commit_msg)
       @commit_messages << commit_msg
     end
 

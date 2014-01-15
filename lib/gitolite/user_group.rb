@@ -1,7 +1,7 @@
 module Gitolite
   class UserGroupConf
 
-    include Gitolite::Utils
+    include Utils
 
     GROUP_CONFIG_PATH = 'conf/group-defs'
     # we need this to make sure that group is there but dummy name is needed to pass gitolite check
@@ -13,19 +13,19 @@ module Gitolite
 
     attr_accessor :name, :members, :logger
 
-    def initialize(group_name, logger_, raise_error_if_missing = false, gitolite_branch = "master")
+    def initialize(group_name, logger_, gitolite_path, gitolite_branch = "master")
       @name    = group_name
       @members = []
       @commit_messages = []
       @group_file_path = File.join(GROUP_CONFIG_PATH, "#{@name}.conf")
-      @gitolite_admin_repo ||= FileAccess.new(Rails.configuration.admin_repo_dir, gitolite_branch)
+      @gitolite_admin_repo ||= FileAccess.new(gitolite_path, gitolite_branch)
       @logger = logger_
 
       # load current state or raise error
       if exists?
         load_group()
-      elsif raise_error_if_missing
-        raise ::Error::NotFound, "Configuration file for group (#{group_name}) does not exist"
+      else
+        raise Gitolite::NotFound, "Configuration file for group (#{group_name}) does not exist"
       end
     end
 
@@ -33,7 +33,7 @@ module Gitolite
       raw_content = @gitolite_admin_repo.file_content(@group_file_path)
 
       unless raw_content
-        raise ::Error::NotFound, "Configuration file for user group (#{@name}) does not exist"
+        raise Gitolite::NotFound, "Configuration file for user group (#{@name}) does not exist"
       end
 
       raw_content.each_line do |l|
@@ -51,6 +51,10 @@ module Gitolite
       !@gitolite_admin_repo.file_content(@group_file_path).nil?
     end
 
+    def any_changes?
+      !@commit_messages.empty?
+    end
+
     def add_git_usernames(array_of_usernames)
       unless is_subset?(@members, array_of_usernames)
         @members.concat(array_of_usernames)
@@ -66,7 +70,7 @@ module Gitolite
       end
     end
 
-    def commit_changes(override_commit_message = nil)
+    def push(override_commit_message = nil)
       # we check if there were changes
       unless @commit_messages.empty?
         content = file_content()
@@ -77,9 +81,9 @@ module Gitolite
         @gitolite_admin_repo.commit(commit_msg)
         @gitolite_admin_repo.push()
         
-        Rails.logger.info(commit_msg)
+        @logger.info(commit_msg)
       else
-        Rails.logger.info("There has been no changes on group '#{@name}' skipping gitolite commit.")
+        @logger.info("There has been no changes on group '#{@name}' skipping gitolite commit.")
       end
     end
 
