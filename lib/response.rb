@@ -10,6 +10,7 @@ module DTK
       ErrorsField = "errors"
       ValidationField = "validation"
       ErrorsSubFieldCode = "code"
+      ErrorsOriginalException = "original_exception"
       GenericError = "error"
     end
 
@@ -158,17 +159,17 @@ module DTK
             begin
               block.call
             rescue ::RestClient::Forbidden => e
-              return error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts) unless e.inspect.to_s.include?("PG::Error")
+              return error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError, ErrorsOriginalException => e},opts) unless e.inspect.to_s.include?("PG::Error")
 
               errors = {"code" => "pg_error", "message" => e.inspect.to_s.strip}
               error_response(errors)
             rescue ::RestClient::ServerBrokeConnection,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
-              error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError},opts)
+              error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError, ErrorsOriginalException => e},opts)
             rescue ::RestClient::ResourceNotFound => e
-              errors = {"code" => RestClientErrors[e.class.to_s], "message" => e.to_s}
+              errors = {"code" => RestClientErrors[e.class.to_s], "message" => e.to_s, ErrorsOriginalException => e}
               error_response(errors)
             rescue Exception => e
-              error_response({ErrorsSubFieldCode => e.class.to_s},opts)
+              error_response({ErrorsSubFieldCode => e.class.to_s, ErrorsOriginalException => e},opts)
             end
           end 
 
