@@ -155,13 +155,13 @@ module DTK
             end
           end
 
-          def error_handling(opts={},&block)            
+          def error_handling(opts={},&block)      
             begin
               block.call
             rescue ::RestClient::Forbidden => e
               return error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError, ErrorsOriginalException => e},opts) unless e.inspect.to_s.include?("PG::Error")
 
-              errors = {"code" => "pg_error", "message" => e.inspect.to_s.strip}
+              errors = {"code" => "pg_error", "message" => e.inspect.to_s.strip, ErrorsOriginalException => e}
               error_response(errors)
             rescue ::RestClient::ServerBrokeConnection,::RestClient::InternalServerError,::RestClient::RequestTimeout,RestClient::Request::Unauthorized, Errno::ECONNREFUSED => e
               error_response({ErrorsSubFieldCode => RestClientErrors[e.class.to_s]||GenericError, ErrorsOriginalException => e},opts)

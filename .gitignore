@@ -1,5 +1,5 @@
 dtk*.gem
-sftp-config.json
+sftp-config*.json
 .gitattributes
 Gemfile.lock
 
