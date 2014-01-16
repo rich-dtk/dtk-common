@@ -47,6 +47,22 @@ module Gitolite
       username
     end
 
+    def remove_user_group(group_name)
+      group_path = @configuration.user_group_path(group_name)
+
+      unless user_group_list.include?(group_path)
+        raise ::Gitolite::NotFound, "User group (#{group_name}) not found on gitolite server"
+      end
+
+      remove_file(key_path, "Removing user group (#{group_name})")
+      group_name
+    end
+
+    def list_repos()
+      repo_names = repo_names_list()
+      repo_names.map { |repo_name| { :repo_name => repo_name, :type => Repo.get_repo_type(repo_name) }}
+    end
+
     def push()
       changed_repos  = @repos.select { |repo| repo.any_changes? }
       changed_groups = @user_groups.select { |ug| ug.any_changes? }
@@ -62,15 +78,20 @@ module Gitolite
       @gitolite_admin ||= Git::FileAccess.new(@gitolite_path)
     end
 
-    def list_files_in_path(path)
-      paths = gitolite_admin_repo.ls_r(path.split("/").size + 1, :files_only => true)
-      match_regexp = Regexp.new("^#{path}")
-      paths.select{ |p| p =~ match_regexp }
-    end
-
     def users_public_keys()
       base_path = @configuration.keydir_path
       list_files_in_path(base_path)
+    end
+
+    def user_group_list()
+      base_path = @configuration.user_group_path
+      list_files_in_path(base_path)
+    end
+
+    def repo_names_list()
+      base_path = @configuration.repo_path
+      repo_file_list = list_files_in_path(base_path)
+      repo_file_list.collect { |r_file_name| extract_file_name(r_file_name, base_path, :conf) }
     end
 
     def commit_file(file, content, commit_msg)
@@ -83,6 +104,32 @@ module Gitolite
       gitolite_admin_repo().remove_file(file_path)
       gitolite_admin_repo().commit(commit_msg)
       @commit_messages << commit_msg
+    end
+
+
+    class << self
+
+      def repo_name_from_file_name(file_name, repo_file_path)
+        if file_name =~ Regexp.new("^#{repo_file_path}/(.+)\.conf")
+          $1
+        else
+          raise Error.new("File name not properly formed for repo config file name (#{file_name})")
+        end
+      end
+    end
+
+    def extract_file_name(full_path_name, file_path, file_extension)
+      if file_name =~ Regexp.new("^#{full_path_name}/(.+)\.#{file_extension}")
+        $1
+      else
+        raise ::Gitolite::ParseError.new("File name not properly formed (#{full_path_name}), expected match based on '#{file_path}/*.#{file_extension}'")
+      end
+    end
+
+    def list_files_in_path(path)
+      paths = gitolite_admin_repo.ls_r(path.split("/").size + 1, :files_only => true)
+      match_regexp = Regexp.new("^#{path}")
+      paths.select{ |p| p =~ match_regexp }
     end
 
   end

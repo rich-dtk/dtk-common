@@ -30,6 +30,14 @@ module Gitolite
       <% end %>
     eos
 
+    class << self
+
+      def get_repo_type(repo_name)
+        repo_name.match(/\-\-cm\-\-/) ? 'component' : 'service'
+      end
+
+    end
+
     def initialize(repo_name, logger_, gitolite_path, gitolite_branch="master")
       # IMPORTANT! Tenants user are always included with each module
       
