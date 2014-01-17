@@ -49,11 +49,8 @@ module Gitolite
       @gitolite_admin_repo ||= Git::FileAccess.new(gitolite_path, gitolite_branch)
       @logger = logger_
 
-      # load current state or raise error
       if exists?
         load_repo()
-      else
-        raise ::NotFound, "Configuration file for repo (#{repo_name}) does not exist"
       end       
     end
 
@@ -98,6 +95,10 @@ module Gitolite
       add_username_with_rights(GIOLITE_ALL_GROUP, access_rights)
     end
 
+    def branches
+      @gitolite_admin_repo.branches()
+    end
+
     def exists?
       !@gitolite_admin_repo.file_content(@repo_file_path).nil?
     end
@@ -106,7 +107,7 @@ module Gitolite
       !@commit_messages.empty?
     end
 
-    def push(override_commit_message = nil)
+    def commit_changes(override_commit_message = nil)
       unless @commit_messages.empty?
         content = file_content()
         validate_gitolite_conf_file(content)
@@ -115,7 +116,6 @@ module Gitolite
 
         @gitolite_admin_repo.add_file(@repo_file_path,content)
         @gitolite_admin_repo.commit(commit_msg)
-        @gitolite_admin_repo.push()
 
         @logger.info(commit_msg)
       else

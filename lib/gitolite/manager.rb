@@ -24,19 +24,19 @@ module Gitolite
       group_conf
     end
 
-    def add_user(username, rsa_pub_key, opts={})
+    def create_user(username, rsa_pub_key, opts={})
       key_path = @configuration.user_key_path(username)
 
       if users_public_keys().include?(key_path)
         raise ::Gitolite::Duplicate, "Trying to create a user (#{username}) that exists already on gitolite server"
       end
 
-      commit_file(key_path,rsa_pub_key, "Added RSA public key for user '#{username}'")
+      add_commit_file(key_path,rsa_pub_key, "Added RSA public key for user '#{username}'")
 
       key_path
     end
 
-    def remove_user(username)
+    def delete_user(username)
       key_path = @configuration.user_key_path(username)
 
       unless users_public_keys().include?(key_path)
@@ -58,6 +58,12 @@ module Gitolite
       group_name
     end
 
+    def delete_user_group(group_name)
+      path = @configuration.user_group_path(group_name)
+      remove_file(path, "Remove user group (#{group_name}) from gitolite.")
+      group_name
+    end
+
     def list_repos()
       repo_names = repo_names_list()
       repo_names.map { |repo_name| { :repo_name => repo_name, :type => Repo.get_repo_type(repo_name) }}
@@ -68,6 +74,9 @@ module Gitolite
       changed_groups = @user_groups.select { |ug| ug.any_changes? }
 
       unless (@commit_messages.empty? && changed_repos.empty? && changed_groups.empty?)
+        changed_repos.each  { |repo| repo.commit_changes }
+        changed_groups.each { |ug|   ug.commit_changes   }
+
         gitolite_admin_repo().push()
       end
     end
@@ -94,7 +103,7 @@ module Gitolite
       repo_file_list.collect { |r_file_name| extract_file_name(r_file_name, base_path, :conf) }
     end
 
-    def commit_file(file, content, commit_msg)
+    def add_commit_file(file, content, commit_msg)
       gitolite_admin_repo().add_file(file, content)
       gitolite_admin_repo().commit(commit_msg)
       @commit_messages << commit_msg

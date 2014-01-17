@@ -5,7 +5,7 @@ module Gitolite
 
     def initialize(
         repo_path_        = 'conf/repo-configs', 
-        user_group_path_  = 'conf/user-groups', 
+        user_group_path_  = 'conf/group-defs', 
         keydir_path_      = 'keydir'
       )
     

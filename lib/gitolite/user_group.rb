@@ -1,5 +1,5 @@
 module Gitolite
-  class UserGroupConf
+  class UserGroup
 
     include Utils
 
@@ -18,14 +18,11 @@ module Gitolite
       @members = []
       @commit_messages = []
       @group_file_path = File.join(GROUP_CONFIG_PATH, "#{@name}.conf")
-      @gitolite_admin_repo ||= FileAccess.new(gitolite_path, gitolite_branch)
+      @gitolite_admin_repo ||= Git::FileAccess.new(gitolite_path, gitolite_branch)
       @logger = logger_
 
-      # load current state or raise error
       if exists?
         load_group()
-      else
-        raise Gitolite::NotFound, "Configuration file for group (#{group_name}) does not exist"
       end
     end
 
@@ -63,6 +60,12 @@ module Gitolite
       end
     end
 
+    def set_git_usernames(array_of_usernames)
+      # we clean current member since we are setting all gitusernames (not adding)
+      @members = []
+      add_git_usernames(array_of_usernames)
+    end
+
     def remove_git_usernames(array_of_usernames)
       if is_subset?(@members, array_of_usernames)
         @members = @members - array_of_usernames
@@ -70,7 +73,7 @@ module Gitolite
       end
     end
 
-    def push(override_commit_message = nil)
+    def commit_changes(override_commit_message = nil)
       # we check if there were changes
       unless @commit_messages.empty?
         content = file_content()
@@ -79,7 +82,6 @@ module Gitolite
 
         @gitolite_admin_repo.add_file(@group_file_path,content)
         @gitolite_admin_repo.commit(commit_msg)
-        @gitolite_admin_repo.push()
         
         @logger.info(commit_msg)
       else

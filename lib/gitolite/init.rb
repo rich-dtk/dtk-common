@@ -1,6 +1,9 @@
 # use to require all needed files needed for running dtk-common gitolite lib
 require 'grit'; require 'erubis'
 
+Grit.debug = true
+
+
 require File.expand_path('manager.rb', File.dirname(__FILE__))
 require File.expand_path('configuration.rb', File.dirname(__FILE__))
 require File.expand_path('errors.rb', File.dirname(__FILE__))
