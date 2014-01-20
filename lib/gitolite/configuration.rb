@@ -25,7 +25,7 @@ module Gitolite
     end
 
     def repo_path(repo_name)
-      "#{@repo_path}/#{repo_name}.conf"
+      "#{@repositories_path}/#{repo_name}.conf"
     end
 
     def bare_repo_path(repo_name)
