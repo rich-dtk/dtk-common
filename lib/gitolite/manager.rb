@@ -1,4 +1,6 @@
 
+require 'fileutils'
+
 module Gitolite
   class Manager
 
@@ -16,6 +18,17 @@ module Gitolite
       repo_conf = Repo.new(repo_name, @logger, @gitolite_path)
       @repos << repo_conf
       repo_conf
+    end
+
+    def delete_repo(repo_name)
+      file_path = @configuration.repo_path(repo_name)
+      remove_file(file_path, "Deleting repo (#{repo_name}) from gitolite.")
+
+      bare_repo_path = @configuration.bare_repo_path(repo_name)
+      if File.directory?(bare_repo_path)
+        FileUtils.rm_rf bare_repo_path
+      end
+      repo_name
     end
 
     def open_group(group_name)
