@@ -69,7 +69,7 @@ module DtkCommon
         :service_module => 
         [
          {:rel_path => "global_module_refs.json", :file_type => :component_module_refs},
-         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.json$/, :file_type => :assembly}
+         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.yaml$/, :file_type => :assembly}
         ]
       }
     end
