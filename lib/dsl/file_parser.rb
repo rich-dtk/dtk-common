@@ -196,13 +196,25 @@ module DtkCommon
 
     class ErrorUsage < Error
       class DSLParsing < self
-        def initialize(base_error_msg,file_path=nil)
-          super(local_method_err_msg(base_error_msg,file_path))
+        def initialize(base_error_msg,file_path_or_opts=nil)
+          file_path,opts = file_path_and_opts(file_path_or_opts)
+          super(local_method_err_msg(base_error_msg,file_path),opts)
         end
         private
         def local_method_err_msg(base_error_msg,file_path=nil)
           file_ref = (file_path && " (in file: #{file_path})")
           "#{base_error_msg}#{file_ref}"
+        end
+
+        def file_path_and_opts(file_path_or_opts)
+          file_path = nil
+          opts = Hash.new
+          if file_path_or_opts.kind_of?(Hash)
+            opts = file_path_or_opts
+          else
+            file_path = file_path_or_opts
+          end
+          [file_path,opts]
         end
 
         class JSONParsing < self
