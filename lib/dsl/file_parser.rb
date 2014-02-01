@@ -195,27 +195,14 @@ module DtkCommon
     end
 
     class ErrorUsage < Error
-      #when error is content does not have JSON
-      # class JSONParse < self
-      #   def initialize(base_json_error,file_path=nil)
-      #     super(err_msg(base_json_error,file_path))
-      #   end
-      #   private
-      #   def err_msg(base_json_error,file_path=nil)
-      #     # file_ref = file_path && " in file (#{file_path})"
-      #     # "JSON parsing error#{file_ref}: #{base_json_error}"
-      #     "#{base_json_error}: #{file_path}"
-      #   end
-      # end
-
       class DSLParsing < self
-        def initialize(base_json_error,file_path=nil)
-          super(err_msg(base_json_error,file_path))
+        def initialize(base_error_msg,file_path=nil)
+          super(local_method_err_msg(base_error_msg,file_path))
         end
         private
-        def err_msg(base_json_error,file_path=nil)
+        def local_method_err_msg(base_error_msg,file_path=nil)
           file_ref = (file_path && " (in file: #{file_path})")
-          "#{base_json_error}#{file_ref}"
+          "#{base_error_msg}#{file_ref}"
         end
 
         class JSONParsing < self
