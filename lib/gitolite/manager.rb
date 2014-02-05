@@ -15,7 +15,7 @@ module Gitolite
     end
 
     def open_repo(repo_name)
-      repo_conf = Repo.new(repo_name, @logger, @gitolite_path)
+      repo_conf = Repo.new(repo_name, @configuration, @logger, @gitolite_path)
       @repos << repo_conf
       repo_conf
     end

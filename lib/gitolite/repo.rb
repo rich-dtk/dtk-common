@@ -8,7 +8,6 @@ module Gitolite
 
     attr_accessor :repo_name, :rights_hash, :commit_messages, :user_groups, :logger
 
-    REPO_CONFIG_PATH  = 'conf/repo-configs'
     GIOLITE_ALL_GROUP = '@all' 
 
 
@@ -38,14 +37,15 @@ module Gitolite
 
     end
 
-    def initialize(repo_name, logger_, gitolite_path, gitolite_branch="master")
+    def initialize(repo_name, configuration_, logger_, gitolite_path, gitolite_branch="master")
       # IMPORTANT! Tenants user are always included with each module
       
       @rights_hash = { 'R' => [], 'W' => [], 'RW' => ['@tenants'], 'RW+' => []}
       @repo_name = repo_name
       @user_groups = []
       @commit_messages = []
-      @repo_file_path = File.join(REPO_CONFIG_PATH, "#{@repo_name}.conf")
+      @repo_conf_file_path = configuration_.repo_path(repo_name)
+      @repo_dir_path       = configuration_.bare_repo_path(repo_name)
       @gitolite_admin_repo ||= Git::FileAccess.new(gitolite_path, gitolite_branch)
       @logger = logger_
 
@@ -96,11 +96,11 @@ module Gitolite
     end
 
     def branches
-      @gitolite_admin_repo.branches()
+      Git::FileAccess.new(@repo_dir_path).branches()
     end
 
     def exists?
-      !@gitolite_admin_repo.file_content(@repo_file_path).nil?
+      !@gitolite_admin_repo.file_content(@repo_conf_file_path).nil?
     end
 
     def any_changes?
@@ -114,7 +114,7 @@ module Gitolite
 
         commit_msg = override_commit_message || @commit_messages.join(', ')
 
-        @gitolite_admin_repo.add_file(@repo_file_path,content)
+        @gitolite_admin_repo.add_file(@repo_conf_file_path,content)
         @gitolite_admin_repo.commit(commit_msg)
 
         @logger.info(commit_msg)
@@ -130,7 +130,7 @@ module Gitolite
   private
 
     def load_repo()
-      raw_content = @gitolite_admin_repo.file_content(@repo_file_path)
+      raw_content = @gitolite_admin_repo.file_content(@repo_conf_file_path)
 
       unless raw_content
         raise ::Error::NotFound, "Configuration file for repo (#{repo_name}) does not exist"

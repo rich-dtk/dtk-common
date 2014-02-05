@@ -1,7 +1,7 @@
 module Gitolite
   class Configuration
 
-    attr_accessor :repositories_path, :user_group_path, :keydir_path, :home_dir
+    attr_reader :repositories_path, :user_group_path, :keydir_path, :home_dir
 
     def initialize(
         repo_path_        = 'conf/repo-configs', 
