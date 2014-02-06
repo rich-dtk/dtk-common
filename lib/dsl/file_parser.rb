@@ -1,7 +1,6 @@
 require 'singleton'
 require 'json'
 require 'yaml'
-require File.expand_path('../hash_object',File.dirname(__FILE__))
 
 module DtkCommon
   module DSL             

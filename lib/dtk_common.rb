@@ -16,8 +16,11 @@ module DTK
       if dtk_common_core_folder
         require File.expand_path("../../#{dtk_common_core_folder}/lib/dtk_common_repo.rb", File.dirname(__FILE__))
       else
-        raise "Not able to find 'dtk-common-core' gem!"
+        raise "Not able to find 'dtk-common-repo' gem!"
       end
+    else
+      # gem installed load from here
+      require 'dtk_common_repo'
     end
 
 
