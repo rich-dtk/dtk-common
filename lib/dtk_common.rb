@@ -14,7 +14,7 @@ module DTK
       end
 
       if dtk_common_core_folder
-        require File.expand_path("../../#{dtk_common_core_folder}/lib/dtk-common-repo.rb", File.dirname(__FILE__))
+        require File.expand_path("../../#{dtk_common_core_folder}/lib/dtk_common_repo.rb", File.dirname(__FILE__))
       else
         raise "Not able to find 'dtk-common-core' gem!"
       end
