@@ -23,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.version       = DtkCommon::PROD_VERSION || "#{DtkCommon::VERSION}.#{ARGV[3]}".chomp(".")
 
   gem.add_dependency 'rugged','~> 0.17.0.b7'
+  gem.add_dependency 'dtk-common-core','~> 0.5.4'
   # gem.add_dependency 'sequel','~> 3.40.0'
   # gem.add_dependency 'rdoc','~> 3.12'
 end

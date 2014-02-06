@@ -7,20 +7,20 @@ module DTK
     require File.expand_path('require_first.rb', File.dirname(__FILE__))
 
     # this gem needs dtk-common-repo to work we load it
-    unless is_gem_installed?('dtk-common-repo')
+    unless is_gem_installed?('dtk-common-core')
       dtk_common_core_folder = POSSIBLE_COMMON_CORE_FOLDERS.find do |folder|
         path = File.join(File.dirname(__FILE__),'..','..',folder)
         File.directory?(path)
       end
 
       if dtk_common_core_folder
-        require File.expand_path("../../#{dtk_common_core_folder}/lib/dtk_common_repo.rb", File.dirname(__FILE__))
+        require File.expand_path("../../#{dtk_common_core_folder}/lib/dtk_common_core.rb", File.dirname(__FILE__))
       else
-        raise "Not able to find 'dtk-common-repo' gem!"
+        raise "Not able to find 'dtk-common-core' gem!"
       end
     else
       # gem installed load from here
-      require 'dtk_common_repo'
+      require 'dtk_common_core'
     end
 
 
