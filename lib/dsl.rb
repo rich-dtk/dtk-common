@@ -1,7 +1,4 @@
-require File.expand_path('auxiliary', File.dirname(__FILE__))
-require File.expand_path('log', File.dirname(__FILE__))
-require File.expand_path('hash_object', File.dirname(__FILE__))
-require File.expand_path('errors', File.dirname(__FILE__))
+
 module DtkCommon
   module DSL    
 
