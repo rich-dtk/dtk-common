@@ -29,3 +29,8 @@ Manager takes responsibility of handling all gitolite methods (or at least most 
     )
 
     manager.push()
+
+
+License
+----------------------
+DTK Common is released under the GPLv3 license. Please see LICENSE for more details.

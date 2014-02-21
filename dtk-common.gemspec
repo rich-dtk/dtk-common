@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Dtk common is needed to use dtk-client gem, provides common libraries for running DTK CLI.}
   gem.summary       = %q{Common libraries used for DTK CLI client.}
   gem.homepage      = "https://github.com/rich-reactor8/dtk-common"
+  gem.licenses      = ["GPL-3.0"]
 
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
