@@ -127,7 +127,7 @@ module Gitolite
       all_pub_keys = users_public_keys()
       base_path    = @configuration.keydir_path
 
-      puts "Starting migration of PUB keys from old format to new!"
+      puts "Starting migration of PUB keys from old format to new! (This can take a while)"
       all_pub_keys.each do |pub_key_path|
         # skip git pub or already migrated key
         unless pub_key_path.match(/.*git.pub$/) || pub_key_path.include?('@')
