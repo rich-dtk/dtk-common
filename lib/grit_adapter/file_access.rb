@@ -6,6 +6,7 @@ module DTK; module Common; class GritAdapter
     require File.expand_path('file_access/diff', File.dirname(__FILE__))
     include StatusMixin
     include DiffMixin
+    
     def add_file(file_rel_path, content=nil)
       content ||= String.new
       file_path = qualified_path(file_rel_path)

@@ -4,6 +4,8 @@ require 'fileutils'
 module Gitolite
   class Manager
 
+    DEFAULT_PUB_KEY_NAME = 'default'
+
     attr_accessor :repos, :user_groups, :configuration, :logger, :commit_messages
     attr_reader :gitolite_path
 
@@ -37,14 +39,15 @@ module Gitolite
       group_conf
     end
 
-    def create_user(username, rsa_pub_key, opts={})
-      key_path = @configuration.user_key_path(username)
+    def create_user(username, rsa_pub_key, rsa_pub_key_name = DEFAULT_PUB_KEY_NAME)
+      key_name = "#{username}@#{rsa_pub_key_name}"
+      key_path = @configuration.user_key_path(key_name)
 
       if users_public_keys().include?(key_path)
-        raise ::Gitolite::Duplicate, "Trying to create a user (#{username}) that exists already on gitolite server"
+        raise ::Gitolite::Duplicate, "Public key (#{rsa_pub_key_name}) already exists for user (#{username}) on gitolite server"
       end
 
-      add_commit_file(key_path,rsa_pub_key, "Added RSA public key for user '#{username}'")
+      add_commit_file(key_path,rsa_pub_key, "Added public key (#{rsa_pub_key_name}) for user (#{username}) ")
 
       key_path
     end
@@ -52,15 +55,40 @@ module Gitolite
     def delete_user(username)
       key_path = @configuration.user_key_path(username)
 
-      unless users_public_keys().include?(key_path)
+      has_there_been_deletion = remove_public_keys_for_user!(username)
+
+      unless has_there_been_deletion
         raise ::Gitolite::NotFound, "User (#{username}) not found on gitolite server"
       end
 
-      remove_file(key_path, "Removing RSA public key for user '#{username}'")
       username
     end
 
-    def remove_user_group(group_name)
+    def add_pub_key!(username, rsa_pub_key_name, rsa_pub_key)
+      file_name = "#{username}@#{rsa_pub_key_name}"
+      key_path  = @configuration.user_key_path(file_name)
+
+      if users_public_keys().include?(key_path)
+        raise ::Gitolite::Duplicate, "Duplicate public key (#{rsa_pub_key_name}) for user (#{username})"
+      end
+
+      add_commit_file(key_path, rsa_pub_key, "Added RSA public key (#{file_name}) for user (#{username})")
+      file_name
+    end
+
+    def remove_pub_key!(username, rsa_pub_key_name)
+      file_name = "#{username}@#{rsa_pub_key_name}"
+      key_path  = @configuration.user_key_path(file_name)
+
+      unless users_public_keys().include?(key_path)
+        raise ::Gitolite::NotFound, "Public key (#{rsa_pub_key_name}) for user (#{username}) not found"
+      end
+
+      remove_file(key_path, "Remove public key (#{rsa_pub_key_name}) for user (#{username})")
+      true
+    end
+
+    def delete_user_group!(group_name)
       group_path = @configuration.user_group_path(group_name)
 
       unless user_group_list.include?(group_path)
@@ -92,6 +120,31 @@ module Gitolite
 
         gitolite_admin_repo().push()
       end
+    end
+
+    # only to help with migration, to be deleted later TODO: Delete
+    def migrate_to_multiple_pub_keys()
+      all_pub_keys = users_public_keys()
+      base_path    = @configuration.keydir_path
+
+      puts "Starting migration of PUB keys from old format to new!"
+      all_pub_keys.each do |pub_key_path|
+        # skip git pub or already migrated key
+        unless pub_key_path.match(/.*git.pub$/) || pub_key_path.include?('@')
+          file_name = extract_file_name(pub_key_path,base_path,:pub)
+          pub_content = gitolite_admin_repo().file_content(pub_key_path)
+
+          # delete_user
+          remove_file(pub_key_path, "Migrating user ('#{file_name}') to new annotation, temporary removing user")
+
+          # create user
+          create_user(file_name, pub_content)
+        end
+      end
+      puts "End migration of pub keys"
+      require 'pp'
+      pp users_public_keys
+      puts "--------------- END ---------------"
     end
 
   private
@@ -128,20 +181,8 @@ module Gitolite
       @commit_messages << commit_msg
     end
 
-
-    class << self
-
-      def repo_name_from_file_name(file_name, repo_file_path)
-        if file_name =~ Regexp.new("^#{repo_file_path}/(.+)\.conf")
-          $1
-        else
-          raise Error.new("File name not properly formed for repo config file name (#{file_name})")
-        end
-      end
-    end
-
     def extract_file_name(full_path_name, file_path, file_extension)
-      if file_name =~ Regexp.new("^#{full_path_name}/(.+)\.#{file_extension}")
+      if full_path_name =~ Regexp.new("^#{file_path}/(.+)\.#{file_extension}")
         $1
       else
         raise ::Gitolite::ParseError.new("File name not properly formed (#{full_path_name}), expected match based on '#{file_path}/*.#{file_extension}'")
@@ -152,6 +193,39 @@ module Gitolite
       paths = gitolite_admin_repo.ls_r(path.split("/").size + 1, :files_only => true)
       match_regexp = Regexp.new("^#{path}")
       paths.select{ |p| p =~ match_regexp }
+    end
+
+    def remove_public_keys_for_user!(username)
+      all_pub_keys = users_public_keys()
+      base_path    = @configuration.keydir_path
+      is_deleted   = false
+
+      all_pub_keys.each do |pub_key_path|
+        file_name = extract_file_name(pub_key_path,base_path,:pub)
+
+        # looking only at pub keys will '@' in their names
+        if file_name.include?('@')
+          files_username, files_pub_name = file_name.split('@')
+
+          # e.g. for user 'haris' we remove haris@home.pub, haris@work.pub
+          if files_username && files_username.eql?(username)
+            remove_file(pub_key_path, "Remove public key (#{files_pub_name}) for user (#{username})")
+            is_deleted = true
+          end
+        end
+      end
+      
+      is_deleted
+    end
+
+    def number_of_public_keys_for_user(username)
+      all_pub_keys = users_public_keys()
+      base_path    = @configuration.keydir_path
+
+      return all_pub_keys.count do |pub_key_path|
+        file_name = extract_file_name(pub_key_path,base_path,:pub)
+        (file_name.eql?(username) || file_name.match(/^#{username}@/))
+      end
     end
 
   end
