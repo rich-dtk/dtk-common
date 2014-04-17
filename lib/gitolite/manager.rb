@@ -4,8 +4,6 @@ require 'fileutils'
 module Gitolite
   class Manager
 
-    DEFAULT_PUB_KEY_NAME = 'default'
-
     attr_accessor :repos, :user_groups, :configuration, :logger, :commit_messages
     attr_reader :gitolite_path
 
@@ -39,7 +37,8 @@ module Gitolite
       group_conf
     end
 
-    def create_user(username, rsa_pub_key, rsa_pub_key_name = DEFAULT_PUB_KEY_NAME)
+    # this should be depracated
+    def create_user(username, rsa_pub_key, rsa_pub_key_name)
       key_name = "#{username}@#{rsa_pub_key_name}"
       key_path = @configuration.user_key_path(key_name)
 
