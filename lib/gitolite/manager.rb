@@ -51,6 +51,10 @@ module Gitolite
       key_path
     end
 
+    def create_user_depracated(username, rsa_pub_key)
+      create_user(username, rsa_pub_key, 'default')
+    end
+
     def delete_user(username)
       key_path = @configuration.user_key_path(username)
 
@@ -122,6 +126,7 @@ module Gitolite
     end
 
     # only to help with migration, to be deleted later TODO: Delete
+    # Depracated: To be removed 
     def migrate_to_multiple_pub_keys()
       all_pub_keys = users_public_keys()
       base_path    = @configuration.keydir_path
@@ -137,7 +142,7 @@ module Gitolite
           remove_file(pub_key_path, "Migrating user ('#{file_name}') to new annotation, temporary removing user")
 
           # create user
-          create_user(file_name, pub_content)
+          create_user_depracated(file_name, pub_content)
         end
       end
       puts "End migration of pub keys"
