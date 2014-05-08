@@ -51,7 +51,7 @@ module Gitolite
       elsif permission.match(/^R/)
         return 'R'
       else
-        raise ::Error::NotSupported, "Not supported permission '#{permission}'!"
+        return nil
       end
     end
 
