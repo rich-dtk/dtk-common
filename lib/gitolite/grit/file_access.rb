@@ -2,6 +2,8 @@ module Gitolite
   module Git
     class FileAccess < Adapter
 
+      
+
       def add_file(file_rel_path,content)
         content ||= String.new
         file_path = qualified_path(file_rel_path)
@@ -33,15 +35,19 @@ module Gitolite
         "#{@repo_dir}/#{file_rel_path}"
       end
 
+      Change_dir_mutex = Mutex.new
+
       def chdir_and_checkout(branch=nil,&block)
-        branch ||= @branch
-        Dir.chdir(@repo_dir) do 
-          current_head = @grit_repo.head.name
-          git_command(:checkout,branch) unless current_head == branch
-          return unless block
-          yield
-          unless current_head == branch
-            git_command(:checkout,current_head)
+        Change_dir_mutex.synchronize do
+          branch ||= @branch
+          Dir.chdir(@repo_dir) do 
+            current_head = @grit_repo.head.name
+            git_command(:checkout,branch) unless current_head == branch
+            return unless block
+            yield
+            unless current_head == branch
+              git_command(:checkout,current_head)
+            end
           end
         end
       end

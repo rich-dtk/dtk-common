@@ -91,6 +91,17 @@ module Gitolite
       true
     end
 
+    def rename_pub_key!(old_username, new_username, rsa_pub_key_name, rsa_pub_key_value)
+      file_name     = "#{old_username}@#{rsa_pub_key_name}"
+      new_file_name = "#{new_username}@#{rsa_pub_key_name}"
+
+      key_path     = @configuration.user_key_path(file_name)
+      new_key_path = @configuration.user_key_path(new_file_name)
+
+      remove_file(key_path, "Rename public key (#{rsa_pub_key_name}) from old user (#{old_username}) to new (#{new_username}) - REMOVE")
+      add_commit_file(new_key_path, rsa_pub_key_value, "Rename public key (#{rsa_pub_key_name}) from old user (#{old_username}) to new (#{new_username}) - ADD")
+    end
+
     def delete_user_group!(group_name)
       group_path = @configuration.user_group_path(group_name)
 
@@ -183,6 +194,10 @@ module Gitolite
       gitolite_admin_repo().remove_file(file_path)
       gitolite_admin_repo().commit(commit_msg)
       @commit_messages << commit_msg
+    end
+
+    def file_content(file_path)
+      gitolite_admin_repo().file_content(file_path)
     end
 
     def extract_file_name(full_path_name, file_path, file_extension)

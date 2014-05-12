@@ -6,7 +6,7 @@ module Gitolite
     
       DEFAULT_BRANCH = 'master'
     
-      def initialize(repo_dir,branch='master')
+      def initialize(repo_dir,branch=DEFAULT_BRANCH)
         @repo_dir = repo_dir
         @branch = branch
         @grit_repo = nil

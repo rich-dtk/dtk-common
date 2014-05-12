@@ -10,7 +10,6 @@ module Gitolite
 
     GIOLITE_ALL_GROUP = '@all' 
 
-
     #
     # We check if there are users in addition to tenant with line,
     # (repo_conf.rights_hash.values.flatten.size > 1)
@@ -52,6 +51,16 @@ module Gitolite
       if exists?
         load_repo()
       end       
+    end
+
+    def rights_for_username(username)
+      @rights_hash.each do |k,v|
+        if v.include?(username)
+          return k
+        end
+      end
+
+      return nil
     end
 
     def remove_username(username)
