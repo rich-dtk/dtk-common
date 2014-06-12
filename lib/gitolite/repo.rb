@@ -118,7 +118,7 @@ module Gitolite
 
     def commit_changes(override_commit_message = nil)
       unless @commit_messages.empty?
-        content = file_content()
+        content = configuration_content()
         validate_gitolite_conf_file(content)
 
         commit_msg = override_commit_message || @commit_messages.join(', ')
@@ -132,11 +132,15 @@ module Gitolite
       end
     end
 
-    def file_content()
-      RepoConfTemplate.result(:repo_conf => self)
+    def file_content(path)
+      Git::FileAccess.new(@repo_dir_path).file_content(path)
     end
 
   private
+
+    def configuration_content()
+      RepoConfTemplate.result(:repo_conf => self)
+    end
 
     def load_repo()
       raw_content = @gitolite_admin_repo.file_content(@repo_conf_file_path)
