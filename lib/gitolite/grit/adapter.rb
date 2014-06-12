@@ -15,7 +15,7 @@ module Gitolite
          rescue ::Grit::NoSuchPathError
           repo_name = repo_dir.split("/").last.gsub("\.git","")
           #TODO: change to usage error
-          raise Error::NotFound, "Repo (#{repo_name}) - path '#{repo_dir}' does not exist"
+          raise ::Gitolite::NotFound, "Repo (#{repo_name}) - path '#{repo_dir}' does not exist"
          rescue => e
           raise e
         end
