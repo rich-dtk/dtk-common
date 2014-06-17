@@ -16,6 +16,10 @@ module DtkCommon
         DirectoryParserMethods.include?(method_name)
       end
 
+      def file_content(rel_file_path)
+        get_content(rel_file_path)
+      end
+
       #if file_type is given returns DtkCommon::DSL::FileParser::OutputArray
       #otherwise returns hash at top level taht is indexed by file types found
       def parse_directory(file_type=nil,opts={})
