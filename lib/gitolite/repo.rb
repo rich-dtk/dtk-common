@@ -7,8 +7,9 @@ module Gitolite
     include Utils
 
     attr_accessor :repo_name, :rights_hash, :commit_messages, :user_groups, :logger
+    attr_reader   :repo_dir_path
 
-    GIOLITE_ALL_GROUP = '@all' 
+    GIOLITE_ALL_GROUP = '@all'
 
     #
     # We check if there are users in addition to tenant with line,
@@ -38,7 +39,7 @@ module Gitolite
 
     def initialize(repo_name, configuration_, logger_, gitolite_path, gitolite_branch="master")
       # IMPORTANT! Tenants user are always included with each module
-      
+
       @rights_hash = { 'R' => [], 'W' => [], 'RW' => ['@tenants'], 'RW+' => []}
       @repo_name = repo_name
       @user_groups = []
@@ -50,7 +51,7 @@ module Gitolite
 
       if exists?
         load_repo()
-      end       
+      end
     end
 
     def rights_for_username(username)
@@ -88,7 +89,7 @@ module Gitolite
 
         @rights_hash[access_rights.upcase] << username
         @commit_messages << "Added access rights ('#{access_rights}') for user/group '#{username}', in repo '#{@repo_name}'"
-        
+
         # add to user groups if user group is added
         if username.match(/^@/)
           @user_groups << username

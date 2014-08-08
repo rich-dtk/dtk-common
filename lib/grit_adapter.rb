@@ -7,7 +7,7 @@ module DTK
   module Common
 
     require File.expand_path('require_first',File.dirname(__FILE__))
-    class GritAdapter 
+    class GritAdapter
       require File.expand_path('grit_adapter/file_access', File.dirname(__FILE__))
       require File.expand_path('grit_adapter/object_access', File.dirname(__FILE__))
       def initialize(repo_dir,branch=nil,opts={})
@@ -39,7 +39,7 @@ module DTK
         end
         clone_cmd_opts = {:raise => true, :timeout => 60}
         clone_args = [git_server_url,target_repo_dir]
-        if branch = opts[:branch] 
+        if branch = opts[:branch]
           clone_args += ["-b",branch]
         end
         ::Grit::Git.new("").clone(clone_cmd_opts,*clone_args)
@@ -79,14 +79,14 @@ module DTK
 
       def push(remote_branch_ref=nil)
         remote_repo,remote_branch = parse_remote_branch_ref(remote_branch_ref)
-        Git_command__push_mutex.synchronize do 
+        Git_command__push_mutex.synchronize do
           git_command(:push,remote_repo||"origin", "#{@branch}:refs/heads/#{remote_branch||@branch}")
         end
       end
       Git_command__push_mutex = Mutex.new
       #returns [remote_repo,remote_branch]
       def parse_remote_branch_ref(remote_branch_ref)
-        if remote_branch_ref 
+        if remote_branch_ref
           split = remote_branch_ref.split("/")
           case split.size
             when 1 then [nil,split[0]]
@@ -116,7 +116,7 @@ module DTK
 
       def create_for_existing_repo(repo_dir,opts={})
         unless File.exists?("#{repo_dir}/.git")
-          raise DTK::Client::DtkError, "#{repo_dir} does not contain .git folder." 
+          raise DTK::Client::DtkError, "#{repo_dir} does not contain .git folder."
         end
         ::Grit::Repo.new(repo_dir)
       end
@@ -141,7 +141,7 @@ module DTK
       def ret_config_keys()
         ::Grit::Config.new(@grit_repo).keys
       end
-      
+
       def ret_config_key_value(key)
         ::Grit::Config.new(@grit_repo).fetch(key)
       end
@@ -167,7 +167,7 @@ module DTK
         if depth == 1
           ret = tree_contents.map do |tc|
             if opts[:file_only]
-              tc.kind_of?(::Grit::Blob) && tc.name 
+              tc.kind_of?(::Grit::Blob) && tc.name
             elsif opts[:directory_only]
               tc.kind_of?(::Grit::Tree) && tc.name
             else
