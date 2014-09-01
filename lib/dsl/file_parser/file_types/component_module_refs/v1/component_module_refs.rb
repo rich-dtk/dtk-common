@@ -13,7 +13,13 @@ module DtkCommon; module DSL; class FileParser
           parse_error = true
           if v.kind_of?(InputHash) and v.only_has_keys?(:version,:remote_namespace,:namespace) and not v.empty?()
             parse_error = false
-            new_el.merge_non_empty!(:version_info => v[:version], :remote_namespace => v[:remote_namespace]||v[:namespace])
+            # v[index] if index not found returns empty InputHash, not nil
+            new_el.merge_non_empty!(:version_info => v[:version])
+            namespace = v[:namespace]
+            namespace = v[:remote_namespace] if namespace.empty? # TODO: for legacy
+            # TODO: change this to new_el.merge_non_empty!(:namespace => namespace) while coordinating with users
+            # of api
+            new_el.merge_non_empty!(:remote_namespace => namespace)
           elsif v.kind_of?(String)
             parse_error = false
             new_el.merge_non_empty!(:version_info => v)
