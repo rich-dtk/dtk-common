@@ -45,10 +45,28 @@ module DtkCommon
         file_type.nil? ? ret : ret[file_type]
       end
 
+      def self.default_rel_path?(directory_type,file_type)
+        if match = file_info_single_match?(directory_type,file_type)
+          match[:default_rel_path]
+        end
+      end
      private
-      def file_info(directory_type)
+      def self.file_info_single_match?(directory_type,file_type)
+        matches = file_info(directory_type).select{|r|r[:file_type] == file_type}
+        if matches.empty? then nil
+        elsif matches.size == 1 then matches.first
+        else
+          raise Error.new("Unexpected to get multiple matches")
+        end
+      end 
+      def self.file_info(directory_type)
         DirectoryTypeFiles[directory_type]
       end
+
+      def file_info(directory_type)
+        self.class.file_info(directory_type)
+      end
+
       def instantiate_rel_path_patterns(rel_file_info)
         ret = Array.new
         all_files_from_root = nil
@@ -68,12 +86,18 @@ module DtkCommon
         end
         ret
       end
-      #TODO: may put version info here too
       DirectoryTypeFiles = {
         :service_module => 
         [
-         {:rel_path => "global_module_refs.json", :file_type => :component_module_refs},
-         {:rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.yaml$/, :file_type => :assembly}
+         {
+           :file_type => :component_module_refs,
+           :rel_path_pattern => /^module_refs.yaml|global_module_refs.json$/,
+           :default_rel_path => 'module_refs.yaml'
+         },
+         {
+           :file_type => :assembly,
+           :rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.yaml$/
+         }
         ]
       }
     end
