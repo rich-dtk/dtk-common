@@ -74,15 +74,27 @@ module DtkCommon
           if rel_path = r[:rel_path]
             ret << r
           else
-            rel_path_pattern = r[:rel_path_pattern]
-            
-            (all_files_from_root ||= all_files_from_root()).each do |f|
-              if f =~ rel_path_pattern
-                file_key = $1
-                ret << {:rel_path => f, :file_type => r[:file_type], :key => file_key}
-              end
+            all_files_from_root ||= all_files_from_root()
+            ret += find_rel_path_matches(r,all_files_from_root)
+          end
+        end
+        ret
+      end
+
+      def find_rel_path_matches(r,all_files_from_root)
+        ret = Array.new
+        unless rel_path_pattern = r[:rel_path_pattern]
+          return ret
+        end
+        rel_path_patterns = (rel_path_pattern.kind_of?(Array) ? rel_path_pattern : [rel_path_pattern])
+        rel_path_pattern.each do |pat|
+          all_files_from_root.each do |f|
+            if f =~ pat
+              file_key = $1
+              ret << {:rel_path => f, :file_type => r[:file_type], :key => file_key}
             end
           end
+          return ret unless ret.empty?
         end
         ret
       end
@@ -91,8 +103,8 @@ module DtkCommon
         [
          {
            :file_type => :component_module_refs,
-           :rel_path_pattern => /^module_refs.yaml|global_module_refs.json$/,
-           :default_rel_path => 'module_refs.yaml'
+           :rel_path_pattern => [/(^module_refs.yaml$)/,/(^global_module_refs.json$)/],
+           :default_rel_path => 'module_refs.yaml',
          },
          {
            :file_type => :assembly,
