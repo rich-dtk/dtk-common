@@ -23,7 +23,7 @@ module DtkCommon
       #if file_type is given returns DtkCommon::DSL::FileParser::OutputArray
       #otherwise returns hash at top level taht is indexed by file types found
       def parse_directory(file_type=nil,opts={})
-        pruned_file_info = 
+        pruned_file_info =
           if file_type
             matches = @file_info.select{|r|r[:file_type] == file_type}
             if matches.empty?
@@ -58,7 +58,7 @@ module DtkCommon
         else
           raise Error.new("Unexpected to get multiple matches")
         end
-      end 
+      end
       def self.file_info(directory_type)
         DirectoryTypeFiles[directory_type]
       end
@@ -83,9 +83,10 @@ module DtkCommon
 
       def find_rel_path_matches(r,all_files_from_root)
         ret = Array.new
-        unless rel_path_pattern = r[:rel_path_pattern]
+        unless r[:rel_path_pattern]
           return ret
         end
+        rel_path_pattern = r[:rel_path_pattern]
         rel_path_patterns = (rel_path_pattern.kind_of?(Array) ? rel_path_pattern : [rel_path_pattern])
         rel_path_pattern.each do |pat|
           all_files_from_root.each do |f|
@@ -99,7 +100,7 @@ module DtkCommon
         ret
       end
       DirectoryTypeFiles = {
-        :service_module => 
+        :service_module =>
         [
          {
            :file_type => :component_module_refs,
