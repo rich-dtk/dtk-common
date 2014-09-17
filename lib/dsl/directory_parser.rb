@@ -86,9 +86,10 @@ module DtkCommon
         unless r[:rel_path_pattern]
           return ret
         end
+
         rel_path_pattern = r[:rel_path_pattern]
         rel_path_patterns = (rel_path_pattern.kind_of?(Array) ? rel_path_pattern : [rel_path_pattern])
-        rel_path_pattern.each do |pat|
+        rel_path_patterns.each do |pat|
           all_files_from_root.each do |f|
             if f =~ pat
               file_key = $1
