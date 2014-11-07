@@ -112,6 +112,22 @@ module DtkCommon
            :file_type => :assembly,
            :rel_path_pattern => /^assemblies\/([^\/]+)\/assembly\.yaml$/
          }
+        ],
+        :component_module =>
+        [
+         {
+           :file_type => :component_module_refs,
+           :rel_path_pattern => [/(^module_refs.yaml$)/,/(^global_module_refs.json$)/],
+           :default_rel_path => 'module_refs.yaml',
+         }
+        ],
+        :test_module =>
+        [
+         {
+           :file_type => :component_module_refs,
+           :rel_path_pattern => [/(^module_refs.yaml$)/,/(^global_module_refs.json$)/],
+           :default_rel_path => 'module_refs.yaml',
+         }
         ]
       }
     end
