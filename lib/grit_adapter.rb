@@ -77,6 +77,12 @@ module DTK
         tree_or_blob && tree_or_blob.kind_of?(::Grit::Blob) && tree_or_blob.data
       end
 
+      def file_content_and_size(path)
+        tree_or_blob = tree/path
+        return nil unless tree_or_blob
+        { :data => tree_or_blob.data, :size => tree_or_blob.size }
+      end
+
       def push(remote_branch_ref=nil)
         remote_repo,remote_branch = parse_remote_branch_ref(remote_branch_ref)
         Git_command__push_mutex.synchronize do
