@@ -137,6 +137,10 @@ module Gitolite
       Git::FileAccess.new(@repo_dir_path).file_content(path)
     end
 
+    def file_content_and_size(path)
+      Git::FileAccess.new(@repo_dir_path).file_content_and_size(path)
+    end
+
     def file_list(depth=nil)
       Git::FileAccess.new(@repo_dir_path).ls_r(depth)
     end
