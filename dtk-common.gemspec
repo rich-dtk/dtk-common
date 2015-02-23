@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/dtk-common/version', __FILE__)
- 
+
 Gem::Specification.new do |gem|
   gem.authors       = ["Rich PELAVIN"]
   gem.email         = ["rich@reactor8.com"]
@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = "#{DtkCommon::VERSION}.#{ARGV[3]}".chomp(".")
 
   gem.add_dependency 'rugged','~> 0.17.0.b7'
-  gem.add_dependency 'dtk-common-core','~> 0.6.0'
+  gem.add_dependency 'dtk-common-core','> 0.6.0'
   gem.add_dependency 'colorize','~> 0.5.8'
   # gem.add_dependency 'sequel','~> 3.40.0'
   # gem.add_dependency 'rdoc','~> 3.12'
