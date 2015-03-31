@@ -3,7 +3,7 @@ require 'json'
 require 'yaml'
 
 module DtkCommon
-  module DSL             
+  module DSL
     class Loader
       include Singleton
       def self.file_parser(file_type,version=nil)
@@ -43,7 +43,7 @@ module DtkCommon
       def default_version(file_type)
         FileTypeVesisonDefaults[file_type] || 1
       end
-      FileTypes = 
+      FileTypes =
         [
          :component_module_refs,
          :assembly
@@ -71,9 +71,8 @@ module DtkCommon
         #TODO: for Rich
         # we need to implement dsl v3 parser, this is just temp fix for autoimport
         # just changed parser to yaml instead of json because new modules/services
-        # are in yaml format now 
+        # are in yaml format now
         raw_hash_content = convert_yaml_content_to_hash(file_content,opts)
-        
         return raw_hash_content if raw_hash_content.is_a?(ErrorUsage::DSLParsing::JSONParsing)
 
         file_parser.parse_hash_content_aux(raw_hash_content)
@@ -168,7 +167,7 @@ module DtkCommon
         ret = Hash.new
         return ret if content.empty?
 
-        begin 
+        begin
           YAML.load(content)
         rescue Exception => e
           return ErrorUsage::DSLParsing::JSONParsing.new("YAML parsing error #{e.to_s} in file", opts[:file_path]) if opts[:do_not_raise]
@@ -182,7 +181,7 @@ module DtkCommon
           return ret
         end
 
-        begin 
+        begin
           ::JSON.parse(json_file_content)
         rescue ::JSON::ParserError => e
           # raise ErrorUsage::JSONParse.new(e.to_s)

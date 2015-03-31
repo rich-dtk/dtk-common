@@ -11,15 +11,16 @@ module DtkCommon; module DSL; class FileParser
         component_modules.each do |component_module,v|
           new_el = OutputHash.new(:component_module => component_module)
           parse_error = true
-          if v.kind_of?(InputHash) and v.only_has_keys?(:version,:remote_namespace,:namespace) and not v.empty?()
+          if v.kind_of?(InputHash) and v.only_has_keys?(:version,:remote_namespace,:namespace,:external_ref) and not v.empty?()
             parse_error = false
-            # v[index] if index not found returns empty InputHash, not nil
+
+            namespace    = v[:namespace]
+            namespace    = v[:remote_namespace] if namespace.empty? # TODO: for legacy
+
+            # to extend module_refs.yaml attributes add code here
             new_el.merge_non_empty!(:version_info => v[:version])
-            namespace = v[:namespace]
-            namespace = v[:remote_namespace] if namespace.empty? # TODO: for legacy
-            # TODO: change this to new_el.merge_non_empty!(:namespace => namespace) while coordinating with users
-            # of api
             new_el.merge_non_empty!(:remote_namespace => namespace)
+            new_el.merge_non_empty!(:external_ref => v[:external_ref])
           elsif v.kind_of?(String)
             parse_error = false
             new_el.merge_non_empty!(:version_info => v)
@@ -43,16 +44,16 @@ module DtkCommon; module DSL; class FileParser
           end
           h.merge(cmp_module => Aux.hash_subset(r,OutputArrayToParseHashCols,:no_non_nil => true))
         end
-        {:component_modules => component_modules} 
+        {:component_modules => component_modules}
       end
-      
+
       OutputArrayToParseHashCols = [{:version_info => :version},:remote_namespace]
 
     end
 
     class OutputArray < FileParser::OutputArray
       def self.keys_for_row()
-        [:component_module,:version_info,:remote_namespace]
+        [:component_module,:version_info,:remote_namespace, :external_ref]
       end
       def self.has_required_keys?(hash_el)
         !hash_el[:component_module].nil?
