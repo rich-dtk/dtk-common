@@ -47,7 +47,7 @@ module Gitolite
       elsif permission.match(/^RWDP?/)
         return "RW+"
       elsif permission.match(/^RW/)
-        return "RW"
+        return "RW+"
       elsif permission.match(/^R/)
         return 'R'
       else
