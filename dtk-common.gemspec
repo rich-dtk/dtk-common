@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "dtk-common"
   gem.require_paths = ["lib"]
-  gem.version       = "#{DtkCommon::VERSION}.#{ARGV[3]}".chomp(".")
+  gem.version       = DtkCommon::VERSION
 
   gem.add_dependency 'rugged','~> 0.17.0.b7'
   gem.add_dependency 'dtk-common-core','0.7.2'
