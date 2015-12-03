@@ -133,16 +133,16 @@ module Gitolite
       end
     end
 
-    def file_content(path)
-      Git::FileAccess.new(@repo_dir_path).file_content(path)
+    def file_content(path, branch=Git::Adapter::DEFAULT_BRANCH)
+      Git::FileAccess.new(@repo_dir_path, branch).file_content(path)
     end
 
-    def file_content_and_size(path)
-      Git::FileAccess.new(@repo_dir_path).file_content_and_size(path)
+    def file_content_and_size(path, branch=Git::Adapter::DEFAULT_BRANCH)
+      Git::FileAccess.new(@repo_dir_path, branch).file_content_and_size(path)
     end
 
-    def file_list(depth=nil)
-      Git::FileAccess.new(@repo_dir_path).ls_r(depth)
+    def file_list(depth=nil, branch=Git::Adapter::DEFAULT_BRANCH)
+      Git::FileAccess.new(@repo_dir_path, branch).ls_r(depth)
     end
 
   private
